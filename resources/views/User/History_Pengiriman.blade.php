@@ -16,7 +16,7 @@
                 {{-- Membuat form pencarian yang fungsional --}}
                 <form action="{{ route('user.history') }}" method="GET" class="flex justify-end mb-4 gap-2">
                     <input type="text" name="search" placeholder="Cari resi, penerima..." value="{{ request('search') }}" class="input input-bordered w-full max-w-xs">
-                    <button type="submit" class="btn btn-primary">Cari</button>
+                    <button type="submit" class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">Cari</button>
                 </form>
                 <div class="overflow-x-auto border border-gray-300 rounded-lg">
     <table class="w-full table-auto text-sm rounded-lg overflow-hidden">

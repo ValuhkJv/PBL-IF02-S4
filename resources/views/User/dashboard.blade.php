@@ -19,7 +19,7 @@
         animation: fadeInScale 0.5s ease-out forwards;
     }
 
-    /* Kelas untuk latar belakang kuning soft */
+     /* Kelas untuk latar belakang kuning soft */
     .bg-soft-yellow-result {
         background-color: #FEF3C7; /* Tailwind yellow-200 */
         border-color: #FDE68A; /* Tailwind yellow-300 */
@@ -37,29 +37,106 @@
         font-weight: bold;
         margin-top: 0.5rem;
     }
+
+    html, body {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden; 
+    }
+
+    .navbar { 
+        margin-bottom: 0 !important; 
+    }
+   
+    header {
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    /* Carousel Full Width */
+    .carousel-full-width {
+        width: 100vw; 
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-top: 0 !important; 
+        padding-top: 0 !important;
+        border: none;
+        box-shadow: none;
+    }
+
+    /* Mengatur tinggi gambar carousel untuk responsivitas */
+    .carousel-item img {
+        width: 100%;
+        height: auto; 
+        object-fit: contain; 
+        background-color: transparent; 
+        display: block;
+    }
+
+    @media (min-width: 640px) { /* sm */
+        .carousel-item img {
+            height: auto;
+        }
+    }
+
+    @media (min-width: 768px) { /* md */
+        .carousel-item img {
+            height: auto;
+        }
+    }
+
+    @media (min-width: 1024px) { /* lg */
+        .carousel-item img {
+            height: auto;
+        }
+    }
+    @media (min-width: 1280px) { /* xl */
+        .carousel-item img {
+            height: auto;
+        }
+    }
+
+    .carousel-item .absolute.px-4.md\:px-6 {
+        padding-left: 1rem; /* setara dengan px-4 */
+        padding-right: 1rem; /* setara dengan px-4 */
+    }
+
+    /* Untuk mobile*/
+    .carousel {
+        border-radius: 0;
+        box-shadow: none;
+        margin-top: 0 !important; 
+    }
+    @media (min-width: 768px) { 
+        .carousel {
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); /* shadow-xl */
+        }
+    }
 </style>
 
-<div class="w-full mx-auto relative">
-    <div class="carousel w-full rounded-lg shadow-xl" id="autoSlider">
+<div class="carousel-full-width"> 
+    <div class="carousel w-full" id="autoSlider">
         <div id="autoSlide1" class="carousel-item relative w-full">
-            <img src="{{ asset('images/kurir/carousel1.jpg') }}" class="w-full object-cover h-64 md:h-80 lg:h-96" alt="Slider Image 1" />
-            <div class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-                <a href="#autoSlide3" class="btn btn-circle bg-base-100 bg-opacity-50 hover:bg-opacity-70 border-none">❮</a>
-                <a href="#autoSlide2" class="btn btn-circle bg-base-100 bg-opacity-50 hover:bg-opacity-70 border-none">❯</a>
+            <img src="{{ asset('images/kurir/fixcarousel4.png') }}" alt="Slider Image 1" />
+            <div class="absolute flex justify-between w-full top-1/2 transform -translate-y-1/2 px-4 md:px-6"> {{-- Adjust px for mobile --}}
+                <a href="#autoSlide3" class="btn btn-circle bg-base-100 bg-opacity-50 border-none">❮</a>
+                <a href="#autoSlide2" class="btn btn-circle bg-base-100 bg-opacity-50 border-none">❯</a>
             </div>
         </div>
         <div id="autoSlide2" class="carousel-item relative w-full">
-            <img src="{{ asset('images/kurir/carousel2.jpg') }}" class="w-full object-cover h-64 md:h-80 lg:h-96" alt="Slider Image 2" />
-            <div class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-                <a href="#autoSlide1" class="btn btn-circle bg-base-100 bg-opacity-50 hover:bg-opacity-70 border-none">❮</a>
-                <a href="#autoSlide3" class="btn btn-circle bg-base-100 bg-opacity-50 hover:bg-opacity-70 border-none">❯</a>
+            <img src="{{ asset('images/kurir/fixcarousel5.png') }}" alt="Slider Image 2" />
+            <div class="absolute flex justify-between w-full top-1/2 transform -translate-y-1/2 px-4 md:px-6"> {{-- Adjust px for mobile --}}
+                <a href="#autoSlide1" class="btn btn-circle bg-base-100 bg-opacity-50 border-none">❮</a>
+                <a href="#autoSlide3" class="btn btn-circle bg-base-100 bg-opacity-50 border-none">❯</a>
             </div>
         </div>
         <div id="autoSlide3" class="carousel-item relative w-full">
-            <img src="{{ asset('images/kurir/carousel3.png') }}" class="w-full object-cover h-64 md:h-80 lg:h-96" alt="Slider Image 3" />
-            <div class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-                <a href="#autoSlide2" class="btn btn-circle bg-base-100 bg-opacity-50 hover:bg-opacity-70 border-none">❮</a>
-                <a href="#autoSlide1" class="btn btn-circle bg-base-100 bg-opacity-50 hover:bg-opacity-70 border-none">❯</a>
+            <img src="{{ asset('images/kurir/fixcarousel6.png') }}" alt="Slider Image 3" />
+            <div class="absolute flex justify-between w-full top-1/2 transform -translate-y-1/2 px-4 md:px-6"> {{-- Adjust px for mobile --}}
+                <a href="#autoSlide2" class="btn btn-circle bg-base-100 bg-opacity-50 border-none">❮</a>
+                <a href="#autoSlide1" class="btn btn-circle bg-base-100 bg-opacity-50 border-none">❯</a>
             </div>
         </div>
     </div>
@@ -229,6 +306,7 @@
     </div>
 </div>
 <!--Footer-->
+<div class="w-full">
     <x-footer :menus="[
         [
             'title' => 'Waktu Kerja',
@@ -251,6 +329,7 @@
             ],
         ],
     ]" />
+    </div>
 </x-app-layout>
 
 <script>

@@ -336,25 +336,37 @@ public function storeFinal(Request $request)
     /**
      * Menampilkan halaman "Daftar Pengiriman" (yang masih aktif) untuk customer.
      */
-    public function List()
-    {
-        try {
-            $shipments = Shipment::whereHas('order', function ($query) {
-                    $query->where('senderUserID', Auth::id());
-                })
-                ->whereNotIn('currentStatus', $this->finishedStatuses)
-                ->with(['order.sender', 'courier', 'order.payments'])
-                ->latest()
-                ->paginate(10);
+    public function List(Request $request)
+{
+    try {
+        $search = $request->input('search');
 
-            return view('User.Daftar_Pengiriman', compact('shipments'));
-            
-        } catch (Exception $e) {
-            Log::error("Error loading shipment list: " . $e->getMessage());
-            return back()->with('error', 'Gagal memuat daftar pengiriman.');
+        $query = Shipment::whereHas('order', function ($q) {
+                $q->where('senderUserID', Auth::id());
+            })
+            ->whereNotIn('currentStatus', $this->finishedStatuses)
+            ->with(['order.sender', 'courier', 'order.payments']);
+
+        // Jika ada pencarian, tambahkan filter
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('tracking_number', 'like', '%' . $search . '%')
+                  ->orWhereHas('order', function ($subq) use ($search) {
+                      $subq->where('receiverName', 'like', '%' . $search . '%');
+                  });
+            });
         }
+
+        $shipments = $query->latest()->paginate(10);
+
+        return view('User.Daftar_Pengiriman', compact('shipments', 'search'));
+
+    } catch (Exception $e) {
+        Log::error("Error loading shipment list: " . $e->getMessage());
+        return back()->with('error', 'Gagal memuat daftar pengiriman.');
     }
-    
+}
+
     /**
      * Menampilkan halaman "History Pengiriman" (yang sudah selesai) untuk customer.
      */
