@@ -87,25 +87,13 @@
     <div id="tab-tracking-content">
         <h3 class="font-bold mb-2">Lacak Pengiriman</h3>
         <div class="flex gap-2 flex-col md:flex-row">
-<<<<<<< Updated upstream
-            <input type="text" id="user_tracking_number" placeholder="Masukkan Nomor Resi Anda"
-=======
             {{-- Menambahkan ID pada input dan tombol --}}
-            <input type="text" id="public_tracking_number" placeholder="Masukkan Nomor Resi Anda"
->>>>>>> Stashed changes
-                   class="input input-bordered w-full" />
-            <button onclick="trackShipment()" class="btn bg-gradient-to-r from-yellow-400 to-yellow-300 text-black shadow font-semibold">
+            <input type="text" id="public_tracking_number" placeholder="Masukkan Nomor Resi Anda" class="input input-bordered w-full" />
+            <button id="public_track_btn" class="btn bg-gradient-to-r from-yellow-400 to-yellow-300 text-black shadow font-semibold">
                 Lacak
             </button>
         </div>
-<<<<<<< Updated upstream
-        <div id="tracking_result" class="mt-4 hidden">
-            <p class="font-semibold">Status Pengiriman: <span id="shipment_status" class="font-normal"></span></p>
-            <p class="font-semibold">Terakhir Diperbarui: <span id="last_tracked_at" class="font-normal"></span></p>
-            <div id="user_map" class="mt-4 rounded-md" style="height: 300px;"></div>
-        </div>
-        <p id="tracking_error_message" class="tracking-error hidden"></p>
-=======
+
         {{-- Container untuk menampilkan hasil pelacakan --}}
         <div id="tracking-result-container" class="mt-4 hidden space-y-2">
             <div class="text-sm">
@@ -115,7 +103,6 @@
             <div id="public_map" class="rounded-md" style="height: 300px; border: 1px solid #e2e8f0;"></div>
         </div>
         <div id="tracking-error-message" class="mt-4 text-red-600 text-sm font-medium hidden"></div>
->>>>>>> Stashed changes
     </div>
 
     <div id="tab-tarif-content" class="hidden">
@@ -165,6 +152,7 @@
             </div>
         @endif
     </div>
+</div>
 </div>
 
 
@@ -259,108 +247,10 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        let currentSlide = 1;
-        const totalSlides = 3;
-
-        function moveToNextSlide() {
-            currentSlide = currentSlide >= totalSlides ? 1 : currentSlide + 1;
-            document.querySelector(`#autoSlide${currentSlide}`).scrollIntoView({
-                behavior: 'smooth',
-                block: 'nearest',
-                inline: 'start'
-            });
-        }
-
-        // Auto slide every 20 seconds (20000 ms)
-        setInterval(moveToNextSlide, 20000);
-    });
-
-    let userMap, userMarker;
-
-    // Fungsi untuk inisialisasi atau memperbarui peta user
-    function initUserMap(lat, long) {
-        if (!userMap) {
-            userMap = L.map('user_map').setView([lat, long], 15);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(userMap);
-        }
-
-        if (userMarker) {
-            userMarker.setLatLng([lat, long]);
-        } else {
-            userMarker = L.marker([lat, long]).addTo(userMap)
-                .bindPopup('Lokasi Kurir Saat Ini').openPopup();
-        }
-
-        userMap.setView([lat, long], 15);
-    }
-
-    // Fungsi untuk melacak pengiriman
-    function trackShipment() {
-        const trackingNumber = document.getElementById('user_tracking_number').value;
-        const trackingResultDiv = document.getElementById('tracking_result');
-        const shipmentStatusSpan = document.getElementById('shipment_status');
-        const lastTrackedAtSpan = document.getElementById('last_tracked_at');
-        const trackingErrorMessage = document.getElementById('tracking_error_message');
-
-        // Sembunyikan hasil sebelumnya dan pesan error
-        trackingResultDiv.classList.add('hidden');
-        trackingErrorMessage.classList.add('hidden');
-        trackingErrorMessage.innerText = '';
-
-        if (!trackingNumber) {
-            trackingErrorMessage.innerText = 'Nomor resi wajib diisi.';
-            trackingErrorMessage.classList.remove('hidden');
-            return;
-        }
-
-        // Tampilkan loading atau pesan bahwa sedang melacak
-        shipmentStatusSpan.innerText = 'Mencari data...';
-        lastTrackedAtSpan.innerText = '';
-        trackingResultDiv.classList.remove('hidden'); // Tampilkan div hasil walaupun masih loading
-
-        fetch("{{ route('api.shipment_location') }}?tracking_number=" + trackingNumber)
-            .then(res => {
-                if (!res.ok) {
-                    return res.json().then(err => Promise.reject(err));
-                }
-                return res.json();
-            })
-            .then(data => {
-                if (data.lat && data.long) {
-                    initUserMap(data.lat, data.long);
-                } else {
-                    // Jika tidak ada lat/long (mungkin belum di-track oleh kurir)
-                    if (userMap) {
-                        userMap.remove(); // Hapus peta jika sudah ada
-                        userMap = null;
-                        userMarker = null;
-                    }
-                    document.getElementById('user_map').innerHTML = '<p class="text-center text-gray-500">Lokasi kurir belum tersedia atau tidak di-update.</p>';
-                }
-
-                shipmentStatusSpan.innerText = data.status || 'N/A';
-                lastTrackedAtSpan.innerText = data.last_tracked_at || 'N/A';
-                trackingResultDiv.classList.remove('hidden');
-                trackingErrorMessage.classList.add('hidden'); // Pastikan error disembunyikan jika sukses
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                if (userMap) {
-                    userMap.remove(); // Hapus peta jika ada error
-                    userMap = null;
-                    userMarker = null;
-                }
-                document.getElementById('user_map').innerHTML = ''; // Kosongkan area peta
-                trackingResultDiv.classList.add('hidden'); // Sembunyikan div hasil jika ada error
-                trackingErrorMessage.innerText = error.message || 'Terjadi kesalahan saat melacak pengiriman.';
-                trackingErrorMessage.classList.remove('hidden');
-            });
-    }
-
-
+    // Pass the PHP condition to a JavaScript variable. 1 is true, 0 is false.
+    const shouldSelectTarifTab = {{ session('tarif') || session('error') || $errors->any() ? 'true' : 'false' }};   
+    
+    // Definisikan fungsi selectTab di scope global agar bisa diakses oleh onclick
     function selectTab(tab) {
         // Konten
         const trackingContent = document.getElementById('tab-tracking-content');
@@ -394,11 +284,7 @@
         }
     }
 
-<<<<<<< Updated upstream
-    // Keep the 'Cek Tarif' tab active on page load if a result was just shown
-    @if (session('tarif') || session('error') || $errors->any())
-        document.addEventListener('DOMContentLoaded', function() {
-=======
+    // Inisialisasi peta publik
     document.addEventListener('DOMContentLoaded', function() {
         let publicMap, publicMarker;
         let trackingInterval = null;
@@ -418,22 +304,12 @@
 
         // --- Logika Tab Tarif saat load halaman ---
         if (shouldSelectTarifTab) {
->>>>>>> Stashed changes
             selectTab('tarif');
             const tarifResultDiv = document.querySelector('.tarif-result-container');
             if (tarifResultDiv) {
                 tarifResultDiv.classList.add('tarif-result-animation');
             }
-<<<<<<< Updated upstream
-        });
-    @else
-        // Default to 'Live Tracking' tab if no tarif result
-        document.addEventListener('DOMContentLoaded', function() {
-            selectTab('tracking');
-        });
-    @endif
-=======
-        } else {
+            } else {
             // Default to tracking tab
             selectTab('tracking');
         }
@@ -583,7 +459,6 @@
                 trackShipment();
             }
         });
-    });
->>>>>>> Stashed changes
+        });
 </script>
 @endsection
