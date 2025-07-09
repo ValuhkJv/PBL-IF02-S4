@@ -19,15 +19,14 @@
 
             {{-- QR Code dan Nomor Resi --}}
             <div class="text-center my-4">
-                {{-- QR Code akan berisi URL untuk dilacak kurir --}}
+            {{-- QR Code berisi URL Google Drive --}}
                 @php
-                    // Jika shipment sudah ada, gunakan tracking number. Jika belum, gunakan order id sebagai placeholder.
-                    $qrContent = $shipment ? route('kurir.scan.track', ['tracking_number' => $shipment->tracking_number]) : $order->midtrans_order_id;
+                 $qrContent = 'https://sj-courier-service-production-3685.up.railway.app/';
                 @endphp
-                <div class="inline-block p-2 border">
-                    {!! QrCode::size(120)->generate($qrContent) !!}
-                </div>
-                <p class="font-mono tracking-widest mt-2">{{ $shipment->tracking_number ?? $order->midtrans_order_id }}</p>
+            <div class="inline-block p-2 border">
+             {!! QrCode::size(120)->generate($qrContent) !!}
+            </div>
+            <p class="font-mono tracking-widest mt-2">{{ $shipment->tracking_number }}</p>
             </div>
             
             {{-- Detail Pengirim & Penerima --}}
@@ -76,7 +75,11 @@
                 <button id="pay-button" class="btn btn-primary">Lanjutkan Pembayaran</button>
             @else
                 {{-- Jika ini pesanan COD atau fallback, tampilkan tombol cetak --}}
-                <button onclick="window.print()" class="btn btn-primary">Cetak Label</button>
+                 <a href="{{ route('User.printResi', ['shipmentID' => $shipment->shipmentID]) }}"
+                    target="_blank"
+                    class="btn bg-blue-500 text-white">
+                    Cetak Resi
+                </a>
             @endif
             <a href="{{ route('dashboard') }}" class="btn btn-ghost">Kembali ke Dashboard</a>
         </div>
