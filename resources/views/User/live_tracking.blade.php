@@ -1,5 +1,3 @@
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 {{-- resources/views/User/live_tracking.blade.php --}}
 <x-app-layout>
     {{-- Halaman ini didedikasikan untuk melacak satu nomor resi --}}
@@ -8,20 +6,27 @@
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     @endpush
 
-    <div class="relative">
-        <div class="bg-yellow-400 p-6 shadow-md h-40 w-full absolute top-0 left-0 z-0"></div>
+   <div class="relative">
+        {{-- Breadcrumbs/Background Kuning --}}
+        {{-- Ini adalah div yang akan memberikan background kuning penuh lebar --}}
+        {{-- Jika x-app-layout sudah memiliki background kuning ini, Anda bisa menghapusnya dari sini --}}
+        <div class="bg-[rgba(255,165,0,0.75)] p-6 shadow-md h-40 absolute top-0 left-1/2 transform -translate-x-1/2 z-0" 
+             style="width: 100vw; margin-left: -50vw; left: 50%;"></div>
 
-        <div class="relative z-10 max-w-4xl mx-auto px-4 py-8">
-            <h1 class="text-2xl font-bold text-black mb-8">Lacak Pengiriman Anda</h1>
+        {{-- Konten Utama Halaman --}}
+        <div class="relative z-10 max-w-7xl mx-auto px-4 py-8">
+            {{-- Judul Halaman --}}
+            <h1 class="text-2xl font-bold text-black mb-8">Live Tracking Pengiriman</h1>
 
+            {{-- Kotak Pencarian dan Hasil Live Tracking --}}
             <div class="bg-white rounded-lg shadow-md p-6">
-                <div class="max-w-xl mx-auto">
-                    <h3 class="font-bold mb-2 text-center">Masukkan Nomor Resi</h3>
-                    <div class="flex gap-2 flex-col md:flex-row">
-                        <input type="text" id="user_tracking_number" placeholder="Contoh: SJ-XXXX-XXXX" class="input input-bordered w-full" />
-                        <button id="track_btn" class="btn bg-yellow-400 hover:bg-yellow-500 text-black shadow font-semibold">
-                            Lacak
-                        </button>
+                <h3 class="font-bold mb-2">Lacak Pengiriman Anda</h3>
+                <div class="flex gap-2 flex-col md:flex-row">
+                    <input type="text" id="user_tracking_number" placeholder="Masukkan Nomor Resi Anda"
+                           class="input input-bordered w-full" />
+                    <button onclick="trackShipment()" class="btn bg-gradient-to-r from-yellow-400 to-yellow-300 text-black shadow font-semibold">
+                        Lacak
+                    </button>
                     </div>
                     
                     {{-- Kontainer untuk menampilkan semua hasil --}}

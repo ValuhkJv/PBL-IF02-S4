@@ -123,3 +123,9 @@ Route::get('/force-logout', function () {
 });
 
 Route::post('/tarif/hitung', [TarifController::class, 'hitungTarif'])->name('tarif.hitung');
+Route::prefix('admin/pengiriman')->name('admin.')->group(function () {
+    Route::get('download/{shipmentID}', [AdminShipmentController::class, 'downloadResi'])->name('downloadResi');
+    Route::get('print/{shipmentID}', [AdminShipmentController::class, 'printResi'])->name('printResi');
+});
+
+  Route::get('/print-resi/{shipmentID}', [ShipmentController::class, 'printResi'])->name('User.printResi');

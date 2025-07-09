@@ -10,6 +10,8 @@ use App\Models\User;
 use App\Models\TrackingHistory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Barryvdh\DomPDF\Facade\Pdf; //untuk membuat file PDF menggunakan dompdf
 
 
 class ShipmentController extends Controller
@@ -155,6 +157,42 @@ class ShipmentController extends Controller
                                 ->latest()->paginate(10);
 
         return view('admin.history_pengiriman', compact('pengiriman'));
+    }
+
+     /**
+    * Download Resi dalam format PDF
+    */
+    public function downloadResi($id)
+    {
+    $shipment = Shipment::findOrFail($id);
+ 
+    // QRCODE
+    $qrContent = 'https://sj-courier-service-production-3685.up.railway.app/';
+
+    // Generate QR code dari link URL
+    $qrcode = base64_encode(QrCode::format('png')->size(150)->generate($qrContent));
+
+    $pdf = PDF::loadView('kurir.resi_pdf', compact('shipment', 'qrcode'))
+             ->setPaper([0, 0, 283.46, 340.157]); // Ukuran resi 10x12 cm
+             
+    return $pdf->download('resi_' . $shipment->tracking_number . '.pdf');
+}
+
+    /**
+    * Menampilkan preview resi pengiriman dalam bentuk halaman (tanpa download).
+    */
+    public function printResi($id)
+    {
+        $shipment = Shipment::findOrFail($id);
+
+        // QRCODE
+        $qrContent = 'https://sj-courier-service-production-3685.up.railway.app/';
+
+        // Generate QR code dalam format base64 PNG
+        // Ukuran QR Code untuk browser print (biasanya lebih kecil karena resolusi layar)
+        $qrcode = base64_encode(QrCode::format('png')->size(70)->generate($qrContent)); 
+
+        return view('User.resi_print', compact('shipment', 'qrcode'));
     }
 
 }
