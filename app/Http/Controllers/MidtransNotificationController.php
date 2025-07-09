@@ -101,8 +101,8 @@ class MidtransNotificationController extends Controller
                     if (!$order->shipment) {
                         $shipment = Shipment::create([
                             'orderID' => $order->orderID,
-                            'itemType' => $order->senderUserID, // Ambil dari data order yang sudah ada
-                            'weightKG' => $order->senderUserID, // Ambil dari data order yang sudah ada
+                            'itemType' => $order->itemType, // Ambil dari data order yang sudah ada
+                            'weightKG' => $order->weightKG, // Ambil dari data order yang sudah ada
                             'currentStatus' => 'Payment Confirmed - Awaiting Pickup',
                             'finalPrice' => $order->estimatedPrice,
                         ]);
@@ -131,8 +131,8 @@ class MidtransNotificationController extends Controller
                     if ($originalOrderDataForShipment) {
                         $shipment = Shipment::create([
                             'orderID' => $originalOrderDataForShipment->orderID,
-                            'itemType' => $originalOrderDataForShipment->itemType ?? 'Barang Kiriman', // Placeholder jika tidak ada
-                            'weightKG' => $originalOrderDataForShipment->weightKG ?? 1, // Placeholder jika tidak ada
+                            'itemType' => $originalOrderDataForShipment->itemType,
+                            'weightKG' => $originalOrderDataForShipment->weightKG,
                             'currentStatus' => 'Payment Confirmed - Awaiting Pickup',
                             'finalPrice' => $originalOrderDataForShipment->estimatedPrice,
                         ]);

@@ -87,18 +87,35 @@
     <div id="tab-tracking-content">
         <h3 class="font-bold mb-2">Lacak Pengiriman</h3>
         <div class="flex gap-2 flex-col md:flex-row">
+<<<<<<< Updated upstream
             <input type="text" id="user_tracking_number" placeholder="Masukkan Nomor Resi Anda"
+=======
+            {{-- Menambahkan ID pada input dan tombol --}}
+            <input type="text" id="public_tracking_number" placeholder="Masukkan Nomor Resi Anda"
+>>>>>>> Stashed changes
                    class="input input-bordered w-full" />
             <button onclick="trackShipment()" class="btn bg-gradient-to-r from-yellow-400 to-yellow-300 text-black shadow font-semibold">
                 Lacak
             </button>
         </div>
+<<<<<<< Updated upstream
         <div id="tracking_result" class="mt-4 hidden">
             <p class="font-semibold">Status Pengiriman: <span id="shipment_status" class="font-normal"></span></p>
             <p class="font-semibold">Terakhir Diperbarui: <span id="last_tracked_at" class="font-normal"></span></p>
             <div id="user_map" class="mt-4 rounded-md" style="height: 300px;"></div>
         </div>
         <p id="tracking_error_message" class="tracking-error hidden"></p>
+=======
+        {{-- Container untuk menampilkan hasil pelacakan --}}
+        <div id="tracking-result-container" class="mt-4 hidden space-y-2">
+            <div class="text-sm">
+                <p><strong>Status:</strong> <span id="shipment_status"></span></p>
+                <p><strong>Terakhir Diperbarui:</strong> <span id="last_tracked_at"></span></p>
+            </div>
+            <div id="public_map" class="rounded-md" style="height: 300px; border: 1px solid #e2e8f0;"></div>
+        </div>
+        <div id="tracking-error-message" class="mt-4 text-red-600 text-sm font-medium hidden"></div>
+>>>>>>> Stashed changes
     </div>
 
     <div id="tab-tarif-content" class="hidden">
@@ -346,30 +363,68 @@
 
     function selectTab(tab) {
         // Konten
-        document.getElementById('tab-tracking-content').classList.add('hidden');
-        document.getElementById('tab-tarif-content').classList.add('hidden');
+        const trackingContent = document.getElementById('tab-tracking-content');
+        const tarifContent = document.getElementById('tab-tarif-content');
+        
+        if (trackingContent) trackingContent.classList.add('hidden');
+        if (tarifContent) tarifContent.classList.add('hidden');
 
         // Tombol Tab
-        document.getElementById('tab-tracking-btn').classList.remove('bg-gradient-to-r', 'from-yellow-400', 'to-yellow-300');
-        document.getElementById('tab-tracking-btn').classList.add('bg-white');
+        const trackingBtn = document.getElementById('tab-tracking-btn');
+        const tarifBtn = document.getElementById('tab-tarif-btn');
+        
+        if (trackingBtn) {
+            trackingBtn.classList.remove('bg-gradient-to-r', 'from-yellow-400', 'to-yellow-300');
+            trackingBtn.classList.add('bg-white');
+        }
 
-        document.getElementById('tab-tarif-btn').classList.remove('bg-gradient-to-r', 'from-yellow-400', 'to-yellow-300');
-        document.getElementById('tab-tarif-btn').classList.add('bg-white');
+        if (tarifBtn) {
+            tarifBtn.classList.remove('bg-gradient-to-r', 'from-yellow-400', 'to-yellow-300');
+            tarifBtn.classList.add('bg-white');
+        }
 
         // Tampilkan tab sesuai yang dipilih
-        document.getElementById(`tab-${tab}-content`).classList.remove('hidden');
-        document.getElementById(`tab-${tab}-btn`).classList.add('bg-gradient-to-r', 'from-yellow-400', 'to-yellow-300');
-        document.getElementById(`tab-${tab}-btn`).classList.remove('bg-white');
+        const activeContent = document.getElementById(`tab-${tab}-content`);
+        const activeBtn = document.getElementById(`tab-${tab}-btn`);
+        
+        if (activeContent) activeContent.classList.remove('hidden');
+        if (activeBtn) {
+            activeBtn.classList.add('bg-gradient-to-r', 'from-yellow-400', 'to-yellow-300');
+            activeBtn.classList.remove('bg-white');
+        }
     }
 
+<<<<<<< Updated upstream
     // Keep the 'Cek Tarif' tab active on page load if a result was just shown
     @if (session('tarif') || session('error') || $errors->any())
         document.addEventListener('DOMContentLoaded', function() {
+=======
+    document.addEventListener('DOMContentLoaded', function() {
+        let publicMap, publicMarker;
+        let trackingInterval = null;
+        const POLLING_INTERVAL_MS = 15000; // 15 detik
+
+        // --- Logika Carousel ---
+        let currentSlide = 1;
+        const totalSlides = 3;
+        function moveToNextSlide() {
+            currentSlide = currentSlide >= totalSlides ? 1 : currentSlide + 1;
+            const slideElement = document.querySelector(`#autoSlide${currentSlide}`);
+            if (slideElement) {
+                slideElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+            }
+        }
+        setInterval(moveToNextSlide, 20000);
+
+        // --- Logika Tab Tarif saat load halaman ---
+        if (shouldSelectTarifTab) {
+>>>>>>> Stashed changes
             selectTab('tarif');
             const tarifResultDiv = document.querySelector('.tarif-result-container');
             if (tarifResultDiv) {
                 tarifResultDiv.classList.add('tarif-result-animation');
             }
+<<<<<<< Updated upstream
         });
     @else
         // Default to 'Live Tracking' tab if no tarif result
@@ -377,5 +432,158 @@
             selectTab('tracking');
         });
     @endif
+=======
+        } else {
+            // Default to tracking tab
+            selectTab('tracking');
+        }
+
+        // Fungsi untuk inisialisasi atau update peta
+        function initPublicMap(lat, long) {
+            const mapContainer = document.getElementById('public_map');
+            if (!mapContainer) return;
+            // Jika peta belum ada, buat baru
+            if (!publicMap) {
+                publicMap = L.map('public_map').setView([lat, long], 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(publicMap);
+            }
+
+            // Jika marker sudah ada, pindahkan. Jika belum, buat baru.
+            if (publicMarker) {
+                publicMarker.setLatLng([lat, long]);
+            } else {
+                const courierIcon = L.icon({
+                    iconUrl: '{{ asset("images/user/courier-icon.png") }}',
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 40],
+                    popupAnchor: [0, -40]
+                });
+                publicMarker = L.marker([lat, long], {icon: courierIcon}).addTo(publicMap)
+                    .bindPopup('Posisi Terkini Paket').openPopup();
+            }
+
+            // Arahkan peta ke posisi marker
+            publicMap.setView([lat, long], 15);
+        }
+
+        function stopCurrentTracking() {
+            if (trackingInterval) {
+                clearInterval(trackingInterval);
+                trackingInterval = null;
+            }
+        }
+
+        // Fungsi utama untuk melacak pengiriman
+        function trackShipment() {
+            stopCurrentTracking(); // Selalu hentikan pelacakan sebelumnya
+
+            const trackingNumberEl = document.getElementById('public_tracking_number');
+            const resultContainer = document.getElementById('tracking-result-container');
+            const errorContainer = document.getElementById('tracking-error-message');
+            const statusSpan = document.getElementById('shipment_status');
+            const lastTrackedSpan = document.getElementById('last_tracked_at');
+            const mapDiv = document.getElementById('public_map');
+            const trackBtn = document.getElementById('public_track_btn');
+
+            // Pastikan semua elemen ada sebelum melanjutkan
+            if (!trackingNumberEl || !resultContainer || !errorContainer || !statusSpan || !lastTrackedSpan || !mapDiv || !trackBtn) {
+                console.error('Elemen yang diperlukan tidak ditemukan');
+                return;
+            }
+
+            const trackingNumber = trackingNumberEl.value.trim();
+
+            // Reset UI
+            errorContainer.textContent = '';
+            errorContainer.classList.add('hidden');
+            resultContainer.classList.add('hidden');
+
+            if (!trackingNumber) {
+                errorContainer.textContent = 'Nomor resi tidak boleh kosong.';
+                errorContainer.classList.remove('hidden');
+                return;
+            }
+
+            trackBtn.disabled = true;
+            trackBtn.innerHTML = `<span class="loading loading-spinner loading-xs"></span> Melacak...`;
+
+            const fetchLocation = async () => {
+                try {
+                    const response = await fetch(`{{ route('api.shipment_location') }}?tracking_number=${trackingNumber}`);
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Gagal mengambil data pengiriman.');
+                    }
+
+                    resultContainer.classList.remove('hidden');
+                    errorContainer.classList.add('hidden');
+                    statusSpan.textContent = data.shipment_status || 'N/A';
+                    lastTrackedSpan.textContent = data.last_tracked_at || 'N/A';
+
+                    // Handle jika pengiriman sudah selesai
+                    if (data.status === 'finished' || (data.shipment_status && data.shipment_status.toLowerCase().includes('selesai'))) {
+                        stopCurrentTracking();
+                        mapDiv.innerHTML = `<div class="flex items-center justify-center h-full bg-gray-100 text-gray-600 p-4 rounded-md">${data.message}</div>`;
+                        if (data.lat && data.long) initPublicMap(data.lat, data.long); // Tampilkan lokasi terakhir
+                        return; // Hentikan proses fetch lebih lanjut
+                    }
+
+                    // Handle pelacakan berdasarkan tracking_status dari API
+                    if (data.tracking_status === 'active' && data.lat && data.long) {
+                        // Pelacakan live aktif, tampilkan peta
+                        if (mapDiv.querySelector('.flex')) { // Jika ada placeholder, hapus
+                            mapDiv.innerHTML = '';
+                            publicMap = null; publicMarker = null; // Reset peta untuk re-inisialisasi
+                        }
+                        initPublicMap(data.lat, data.long);
+                        // Pastikan polling berlanjut
+                        if (!trackingInterval) {
+                            trackingInterval = setInterval(fetchLocation, POLLING_INTERVAL_MS);
+                        }
+                    } else {
+                        // Pelacakan tidak aktif untuk resi ini, tampilkan pesan
+                        stopCurrentTracking(); // Hentikan polling karena lokasi tidak akan update
+                        const message = data.message || 'Lokasi kurir belum tersedia saat ini.';
+                        mapDiv.innerHTML = `<div class="flex items-center justify-center h-full bg-blue-50 text-blue-800 p-4 rounded-md text-center">${message}</div>`;
+                    }
+
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                    errorContainer.textContent = error.message;
+                    errorContainer.classList.remove('hidden');
+                    resultContainer.classList.add('hidden');
+                    stopCurrentTracking();
+                }
+            };
+
+            // Panggil pertama kali, lalu set interval jika belum selesai
+            fetchLocation().then(() => {
+                const statusElement = document.getElementById('shipment_status');
+                if (!trackingInterval && statusElement && statusElement.textContent.toLowerCase().indexOf('selesai') === -1 && document.getElementById('public_map').innerHTML.indexOf('Peta') === -1) {
+                    trackingInterval = setInterval(fetchLocation, POLLING_INTERVAL_MS);
+                }
+            }).finally(() => {
+                trackBtn.disabled = false;
+                trackBtn.innerHTML = 'Lacak';
+            });
+        }
+
+        // Menggunakan event delegation untuk menghindari error
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.id === 'public_track_btn') {
+                trackShipment();
+            }
+        });
+
+        document.addEventListener('keypress', function(e) {
+            if (e.target && e.target.id === 'public_tracking_number' && e.key === 'Enter') {
+                trackShipment();
+            }
+        });
+    });
+>>>>>>> Stashed changes
 </script>
 @endsection

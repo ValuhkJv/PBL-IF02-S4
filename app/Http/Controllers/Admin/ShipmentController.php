@@ -69,43 +69,44 @@ class ShipmentController extends Controller
      * Menugaskan kurir ke sebuah pengiriman.
      */
     public function assignCourier(Request $request)
-    {
-        $request->validate([
-            'shipment_id' => 'required|exists:shipments,shipmentID',
-            'kurir_id' => 'required|exists:users,user_id',
-            'pickupTimestamp' => 'required|date_format:Y-m-d\TH:i', // Format timestamp pengambilan
-            'noteadmin' => 'nullable|string|max:255',
+{
+    $request->validate([
+        'shipment_id' => 'required|exists:shipments,shipmentID',
+        'kurir_id' => 'required|exists:users,user_id',
+        'pickupTimestamp' => 'required|date_format:Y-m-d\TH:i',
+        'notes' => 'nullable|string|max:255', // <-- Telah diubah
+    ]);
+
+    DB::beginTransaction();
+    try {
+        $shipment = Shipment::findOrFail($request->shipment_id);
+        $kurir = User::findOrFail($request->kurir_id);
+
+        // Perbarui data pengiriman
+        $shipment->courierUserID = $kurir->user_id;
+        $shipment->currentStatus = 'Menunggu Diambil Kurir';
+        $shipment->pickupTimestamp = $request->pickupTimestamp;
+        // Mengambil dari request 'notes' dan tetap menyimpan ke kolom 'noteadmin'
+        $shipment->noteadmin = $request->notes; // <-- Telah diubah
+        $shipment->save();
+
+        // Buat entri baru di riwayat pelacakan
+        TrackingHistory::create([
+            'shipmentID' => $shipment->shipmentID,
+            'statusDescription' => 'Kurir (' . $kurir->name . ') telah ditugaskan oleh admin.',
+            'updatedByUserID' => auth()->id(),
         ]);
 
-        DB::beginTransaction();
-        try {
-            $shipment = Shipment::findOrFail($request->shipment_id);
-            $kurir = User::findOrFail($request->kurir_id);
+        DB::commit();
 
-            // Perbarui data pengiriman
-            $shipment->courierUserID = $kurir->user_id;
-            $shipment->currentStatus = 'Menunggu Diambil Kurir';
-            $shipment->pickupTimestamp = $request->pickupTimestamp; // Simpan timestamp pengambilan
-            $shipment->noteadmin = $request->noteadmin; // Simpan catatan admin
-            $shipment->save();
+        return response()->json(['message' => 'Kurir ' . $kurir->name . ' berhasil ditugaskan untuk resi ' . $shipment->tracking_number]);
 
-            // Buat entri baru di riwayat pelacakan
-            TrackingHistory::create([
-                'shipmentID' => $shipment->shipmentID,
-                'statusDescription' => 'Kurir (' . $kurir->name . ') telah ditugaskan oleh admin.',
-                'updatedByUserID' => auth()->id(),
-            ]);
-
-            DB::commit();
-
-            return response()->json(['message' => 'Kurir ' . $kurir->name . ' berhasil ditugaskan untuk resi ' . $shipment->tracking_number]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error("Gagal menugaskan kurir: " . $e->getMessage());
-            return response()->json(['message' => 'Terjadi kesalahan internal.'], 500);
-        }
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error("Gagal menugaskan kurir: " . $e->getMessage());
+        return response()->json(['message' => 'Terjadi kesalahan internal.'], 500);
     }
+}
 
     /**
      * Menampilkan halaman status pengiriman yang sedang berlangsung.

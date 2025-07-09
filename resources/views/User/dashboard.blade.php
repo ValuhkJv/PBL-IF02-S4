@@ -1,8 +1,4 @@
-@extends('layouts.PublicUser')
-
-@section('title', 'Home')
-
-@section('content')
+<x-app-layout>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -161,10 +157,6 @@
             <p class="text-sm md:text-base text-gray-700">
                 Semua fitur yang tersedia dirancang untuk memberikan pengalaman pengiriman yang lebih cepat, aman, praktis, dan transparan, sehingga kamu dapat mengelola semua kebutuhan pengiriman dalam satu tempat dengan nyaman.
             </p>
-
-            <div class="mt-4 md:mt-6">
-                <a href="{{ route('register') }}" class="btn btn-primary btn-sm md:btn-md">Daftar Sekarang</a>
-            </div>
         </div>
 
         <div class="hidden md:flex justify-center">
@@ -180,7 +172,7 @@
             title="Live Tracking"
             description="Tak perlu khawatir soal pengiriman. Pantau posisi paket secara real-time dan pastikan tiba tepat waktu!"
             button="Lacak Sekarang"
-            link="#" {{-- Ubah link ini ke bagian live tracking di halaman ini --}}
+            link="{{ route('user.live_tracking') }}"
             icon="{{ asset('images/user/1.png') }}"
         />
 
@@ -188,7 +180,7 @@
             title="Permintaan Pengiriman dan Pembayaran"
             description="Ajukan permintaan pengiriman dan lakukan pembayaran dengan mudah, cepat, dan aman dalam hitungan detik!"
             button="Buat Pengiriman"
-            link="{{ asset('kurir/kelola_status') }}"
+            link="{{ route('user.form_pengiriman') }}"
             icon="{{ asset('images/user/2.png') }}"
         />
 
@@ -196,7 +188,7 @@
             title="Cek Tarif"
             description="Lakukan cek tarif untuk menghitung estimasi biaya pengiriman suatu paket dari lokasi pengirim ke lokasi penerima!"
             button="Lihat"
-            link="{{ asset('kurir/kelola_status') }}"
+            link="{{ route('dashboard') }}"
             icon="{{ asset('images/user/3.png') }}"
         />
 
@@ -204,7 +196,7 @@
             title="History Pengiriman"
             description="Lihat daftar pengirimanmu kapan saja! Riwayat lengkap & transparan untuk memastikan semuanya terkendali."
             button="Lihat History"
-            link="{{ asset('kurir/history') }}"
+            link="{{ route('user.history') }}"
             icon="{{ asset('images/user/4.png') }}"
         />
     </div>
@@ -233,13 +225,33 @@
                     Setelah pengiriman berhasil, simpan nomor resi sebagai bukti dan referensi jika dibutuhkan di kemudian hari.
                 </p>
             </div>
-
-            <div class="mt-4 md:mt-6">
-                <a href="{{ route('register') }}" class="btn btn-primary btn-sm md:btn-md">Daftar dan Kirim Paket Sekarang</a>
-            </div>
         </div>
     </div>
 </div>
+<!--Footer-->
+    <x-footer :menus="[
+        [
+            'title' => 'Waktu Kerja',
+            'content' => '<p>Senin - Jumat: 08:00 - 18:00</p><p>Sabtu: 09:00 - 15:00</p><p>Minggu: Libur</p>',
+        ],
+        [
+            'title' => 'Layanan Kami',
+            'items' => [
+                ['label' => 'Live Tracking', 'url' => route('user.live_tracking')],
+                ['label' => 'Pengiriman', 'url' => route('user.form_pengiriman')],
+                ['label' => 'Cek Tarif', 'url' => route('dashboard')],
+                ['label' => 'History Pengiriman', 'url' => route('user.history')],
+            ],
+        ],
+        [
+            'title' => 'Privacy & TOS',
+            'items' => [
+                ['label' => 'Kebijakan Privasi', 'url' => '#'],
+                ['label' => 'Syarat & Ketentuan', 'url' => '#'],
+            ],
+        ],
+    ]" />
+</x-app-layout>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -363,19 +375,16 @@
     }
 
     // Keep the 'Cek Tarif' tab active on page load if a result was just shown
-    @if (session('tarif') || session('error') || $errors->any())
-        document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
+        const hasTarif = "{{ session('tarif') || session('error') || $errors->any() ? 'true' : 'false' }}";
+        if (hasTarif === "true") {
             selectTab('tarif');
             const tarifResultDiv = document.querySelector('.tarif-result-container');
             if (tarifResultDiv) {
                 tarifResultDiv.classList.add('tarif-result-animation');
             }
-        });
-    @else
-        // Default to 'Live Tracking' tab if no tarif result
-        document.addEventListener('DOMContentLoaded', function() {
+        } else {
             selectTab('tracking');
-        });
-    @endif
+        }
+    });
 </script>
-@endsection

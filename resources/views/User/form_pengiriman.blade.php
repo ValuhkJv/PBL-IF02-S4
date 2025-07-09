@@ -20,7 +20,7 @@
                 </div>
             @endif
 
-            <form id="shipmentForm" method="POST" action="{{ route('shipments.store.step1') }}">
+            <form id="shipmentForm" method="POST" action="{{ route('user.store_pengiriman') }}">
                 @csrf
 
                 <!-- ================================== -->
@@ -61,10 +61,22 @@
                     @endif
                     
                     {{-- Alamat Penjemputan Baru / Manual --}}
-                    <div class="mt-2">
-                        <label for="pickupAddress" class="block text-sm font-medium text-gray-700">Alamat Penjemputan</label>
-                        <input type="text" id="pickupAddress" name="pickupAddress" placeholder="Isi alamat baru atau pilih dari daftar di atas" value="{{ old('pickupAddress', Auth::user()->address) }}" class="input input-bordered w-full @error('pickupAddress') input-error @enderror" required>
-                        @error('pickupAddress')<span class="text-error text-xs mt-1">{{ $message }}</span>@enderror
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                        <div>
+                            <label for="pickupAddress" class="block text-sm font-medium text-gray-700">Alamat Penjemputan</label>
+                            <input type="text" id="pickupAddress" name="pickupAddress" placeholder="Isi alamat baru atau pilih dari daftar di atas" value="{{ old('pickupAddress', Auth::user()->address) }}" class="input input-bordered w-full @error('pickupAddress') input-error @enderror" required>
+                            @error('pickupAddress')<span class="text-error text-xs mt-1">{{ $message }}</span>@enderror
+                        </div>
+                        <div>
+                            <label for="pickupKecamatan" class="block text-sm font-medium text-gray-700">Kecamatan Penjemputan</label>
+                            <select id="pickupKecamatan" name="pickupKecamatan" class="select select-bordered w-full @error('pickupKecamatan') select-error @enderror" required>
+                                <option disabled selected value="">-- Pilih Kecamatan --</option>
+                                @foreach($kecamatanList as $kecamatan)
+                                    <option value="{{ $kecamatan }}" @if(old('pickupKecamatan') == $kecamatan) selected @endif>{{ $kecamatan }}</option>
+                                @endforeach
+                            </select>
+                            @error('pickupKecamatan')<span class="text-error text-xs mt-1">{{ $message }}</span>@enderror
+                        </div>
                     </div>
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Titik Penjemputan di Peta</label>
@@ -94,10 +106,22 @@
                             @error('receiverPhoneNumber')<span class="text-error text-xs mt-1">{{ $message }}</span>@enderror
                         </div>
                     </div>
-                    <div class="mt-4">
-                        <label for="receiverAddress" class="block text-sm font-medium text-gray-700">Alamat Penerima</label>
-                        <input type="text" id="receiverAddress" name="receiverAddress" placeholder="Masukkan Alamat lengkap penerima" value="{{ old('receiverAddress') }}" class="input input-bordered w-full @error('receiverAddress') input-error @enderror" required>
-                        @error('receiverAddress')<span class="text-error text-xs mt-1">{{ $message }}</span>@enderror
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label for="receiverAddress" class="block text-sm font-medium text-gray-700">Alamat Penerima</label>
+                            <input type="text" id="receiverAddress" name="receiverAddress" placeholder="Masukkan Alamat lengkap penerima" value="{{ old('receiverAddress') }}" class="input input-bordered w-full @error('receiverAddress') input-error @enderror" required>
+                            @error('receiverAddress')<span class="text-error text-xs mt-1">{{ $message }}</span>@enderror
+                        </div>
+                        <div>
+                            <label for="receiverKecamatan" class="block text-sm font-medium text-gray-700">Kecamatan Tujuan</label>
+                            <select id="receiverKecamatan" name="receiverKecamatan" class="select select-bordered w-full @error('receiverKecamatan') select-error @enderror" required>
+                                <option disabled selected value="">-- Pilih Kecamatan --</option>
+                                @foreach($kecamatanList as $kecamatan)
+                                    <option value="{{ $kecamatan }}" @if(old('receiverKecamatan') == $kecamatan) selected @endif>{{ $kecamatan }}</option>
+                                @endforeach
+                            </select>
+                            @error('receiverKecamatan')<span class="text-error text-xs mt-1">{{ $message }}</span>@enderror
+                        </div>
                     </div>
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Titik Tujuan di Peta</label>

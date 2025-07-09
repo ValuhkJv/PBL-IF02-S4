@@ -4,8 +4,16 @@
         <div class="relative z-10 max-w-7xl mx-auto px-4 py-8">
             <h1 class="text-2xl font-bold text-black mb-8">History Pengiriman</h1>
             <div class="bg-white rounded-lg shadow-md p-6">
+                {{-- Menampilkan pesan sukses jika ada (misal: setelah pembayaran berhasil) --}}
+                @if (session('success'))
+                    <div role="alert" class="alert alert-success mb-6 shadow-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span>{{ session('success') }}</span>
+                    </div>
+                @endif
+
                 {{-- Membuat form pencarian yang fungsional --}}
-                <form action="{{ route('customer.history') }}" method="GET" class="flex justify-end mb-4 gap-2">
+                <form action="{{ route('user.history') }}" method="GET" class="flex justify-end mb-4 gap-2">
                     <input type="text" name="search" placeholder="Cari resi, penerima..." value="{{ request('search') }}" class="input input-bordered w-full max-w-xs">
                     <button type="submit" class="btn btn-primary">Cari</button>
                 </form>
@@ -35,7 +43,7 @@
                                 <td><span class="badge badge-success text-white">{{ $shipment->currentStatus }}</span></td>
                                 <td class="flex gap-2">
                                     {{-- Tombol untuk melihat detail/cetak label --}}
-                                    <a href="{{ route('shipments.confirmation', ['order' => $shipment->orderID]) }}" target="_blank" class="btn btn-xs btn-outline btn-info" title="Lihat Detail/Cetak">
+                                    <a href="{{ route('user.confirmation', ['order' => $shipment->orderID]) }}" target="_blank" class="btn btn-xs btn-outline btn-info" title="Lihat Detail/Cetak">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
                                     </a>
                                     {{-- Tombol untuk mengunduh bukti pengiriman, hanya muncul jika file ada --}}

@@ -27,6 +27,8 @@ class Order extends Model
         'receiverLongitude',
         'midtrans_snap_token',
         'midtrans_order_id',
+        'pickupKecamatan',
+        'receiverKecamatan',
     ];
 
     protected $casts = [

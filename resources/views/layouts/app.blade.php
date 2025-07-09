@@ -27,9 +27,7 @@
             height: 300px;
             border-radius: 0.5rem; /* Sesuai dengan rounded-lg daisyUI */
         }
-        .main-content {
-            margin-top: 80px; /* Sesuaikan dengan tinggi navbar */  
-        }
+
     </style>
 </head>
 
@@ -40,31 +38,7 @@
     <!-- Page Content -->
     <main class="main-content flex-grow pt-20 md:px-10">
         {{ $slot }}
-    </main>  
-
-    <!--Footer-->
-    <x-footer :menus="[
-        [
-            'title' => 'Waktu Kerja',
-            'content' => '<p>Senin - Jumat: 08:00 - 18:00</p><p>Sabtu: 09:00 - 15:00</p><p>Minggu: Libur</p>',
-        ],
-        [
-            'title' => 'Layanan Kami',
-            'items' => [
-                ['label' => 'Live Tracking', 'url' => '#'],
-                ['label' => 'Pengiriman', 'url' => '#'],
-                ['label' => 'Cek Tarif', 'url' => '#'],
-                ['label' => 'History Pengiriman', 'url' => '#'],
-            ],
-        ],
-        [
-            'title' => 'Privacy & TOS',
-            'items' => [
-                ['label' => 'Kebijakan Privasi', 'url' => '#'],
-                ['label' => 'Syarat & Ketentuan', 'url' => '#'],
-            ],
-        ],
-    ]" />
+    </main> 
 
     <!-- Leaflet JS (TAMBAHAN) -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>

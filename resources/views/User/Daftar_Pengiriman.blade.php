@@ -38,14 +38,14 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <a href="{{ route('shipments.confirmation', ['order' => $shipment->orderID]) }}" class="btn btn-sm btn-primary">Detail</a>
+                                    <a href="{{ route('user.confirmation', ['order' => $shipment->orderID]) }}" class="btn btn-sm btn-primary">Detail</a>
                                 </td>
                             </tr>
                             @empty
                             <tr>
                                 <td colspan="9" class="text-center py-8">
                                     <p>Tidak ada pengiriman yang sedang aktif.</p>
-                                    <a href="{{ route('shipments.create.step1') }}" class="btn btn-sm btn-primary mt-4">Buat Pengiriman Baru</a>
+                                    <a href="{{ route('user.form_pengiriman') }}" class="btn btn-sm btn-primary mt-4">Buat Pengiriman Baru</a>
                                 </td>
                             </tr>
                             @endforelse

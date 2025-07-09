@@ -9,9 +9,9 @@
                 <div>
                     <h2 class="text-lg font-semibold mb-2">Ringkasan Pesanan</h2>
                     <div class="text-sm space-y-1">
-                        <p><strong>Dari:</strong> {{ $data['pickupAddress'] }}</p>
+                        <p><strong>Dari:</strong> {{ $data['pickupAddress'] }}, Kec. {{ $data['pickupKecamatan'] }}</p>
                         <p><strong>Kepada:</strong> {{ $data['receiverName'] }} ({{ $data['receiverPhoneNumber'] }})</p>
-                        <p><strong>Alamat Tujuan:</strong> {{ $data['receiverAddress'] }}</p>
+                        <p><strong>Alamat Tujuan:</strong> {{ $data['receiverAddress'] }}, Kec. {{ $data['receiverKecamatan'] }}</p>
                         <p><strong>Barang:</strong> {{ $data['itemType'] }} ({{ $data['weightKG'] }} Kg)</p>
                         <p><strong>Jarak:</strong> ~{{ number_format($data['estimatedDistanceKM'], 1) }} Km</p>
                     </div>
@@ -26,7 +26,7 @@
 
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                  <h2 class="text-lg font-semibold mb-4">Pilih Metode Pembayaran</h2>
-                <form method="POST" action="{{ route('shipments.store.final') }}">
+                <form method="POST" action="{{ route('user.store.final') }}">
                     @csrf
                     <div class="space-y-2">
                         <label class="label cursor-pointer p-4 border rounded-lg hover:bg-gray-50">
