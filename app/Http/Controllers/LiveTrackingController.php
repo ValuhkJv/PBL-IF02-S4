@@ -92,7 +92,7 @@ class LiveTrackingController extends Controller
             $updated = $shipment->update([
                     'current_lat' => $request->lat,
                     'current_long' => $request->long,
-                    'last_updated_at' => now(),
+                    'last_tracked_at' => now(),
                 ]);
 
             if ($updated) {
