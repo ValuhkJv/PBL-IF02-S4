@@ -30,7 +30,7 @@ class LiveTrackingController extends Controller
         // Redirect ke view sesuai role
         switch ($user->role->role_name) {
             case 'admin':
-                return view('admin.live_tracking');
+                return view('admin.live_tracking_admin');
             case 'courier':
                 return view('kurir.live_tracking');
             case 'customer':

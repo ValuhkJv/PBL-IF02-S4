@@ -61,14 +61,14 @@ Route::prefix('admin')->middleware(['auth','role:admin'])->group(function () {
     Route::get('/dashboard_admin', [DashboardAdminController::class, 'index'])->name('admin.dashboard_admin');
     
     // Admin Live Tracking
-    Route::get('/live-tracking', [LiveTrackingController::class, 'index'])->name('admin.live_tracking');
+    Route::get('/live_tracking_admin', [LiveTrackingController::class, 'index'])->name('admin.live_tracking');
     Route::get('/api/all-shipments', [LiveTrackingController::class, 'getAllActiveShipments'])->name('api.all_shipments');
     
     // Shipment management
     Route::get('/kelola_pengiriman', [AdminShipmentController::class, 'index'])->name('admin.kelola_pengiriman');
     Route::get('/couriers/by-area/{area_id}', [AdminShipmentController::class, 'getCouriersByArea'])->name('couriers.byArea');
     Route::post('/shipments/assign-courier', [AdminShipmentController::class, 'assignCourier'])->name('shipments.assignCourier');
-    Route::get('/api/pengiriman-per-wilayah', [DashboardAdminController::class, 'getPengirimanPerWilayah'])->name('admin.api.pengiriman-per-wilayah');
+    Route::get('/api/pengiriman-per-wilayah', [DashboardAdminController::class, 'getPengirimanPerWilayah'])->name('admin.api.pengirimanPerWilayah');
     
     // Courier management
     Route::get('/kelola_kurir', [KelolaKurirController::class, 'index'])->name('admin.kelola_kurir');
@@ -81,6 +81,11 @@ Route::prefix('admin')->middleware(['auth','role:admin'])->group(function () {
     // Shipment status and history
     Route::get('/status_pengiriman', [AdminShipmentController::class, 'statusPengiriman'])->name('admin.status_pengiriman');
     Route::get('/history_pengiriman', [AdminShipmentController::class, 'historyPengiriman'])->name('admin.history_pengiriman');
+
+    // Profile management
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('admin.profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('admin.profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('admin.profile.destroy');
 });
 
 // ------------------- Authenticated Courier Routes -------------------
