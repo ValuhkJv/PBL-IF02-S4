@@ -5,8 +5,11 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<div class="px-4 mt-20">
+<div class="absolute top-32 left-0 right-0 px-4">
     <div class="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-md text-center">
+        <x-alert type="warning" id="trackingAlert" class="hidden">
+            Silakan pilih pengiriman yang akan diantar.
+        </x-alert>
         <h1 class="text-xl font-bold mb-4">Aktifkan Live Tracking Kurir</h1>
         
         <div class="flex flex-col md:flex-row gap-2 mb-4">
@@ -42,6 +45,21 @@
     const trackingSelect = document.getElementById('tracking_number_select');
     const statusMessage = document.getElementById('status_message');
     const lastSentTime = document.getElementById('last_sent_time');
+
+    function showAlert(alertId) {
+    const alertDiv = document.getElementById(alertId);
+    if (alertDiv) {
+        alertDiv.classList.remove('hidden'); // Cukup tampilkan
+        setTimeout(() => hideAlert(alertId), 5000); // Sembunyikan setelah 5 detik
+    }
+}
+
+    function hideAlert(alertId) {
+        const alertDiv = document.getElementById(alertId);
+        if (alertDiv) {
+            alertDiv.classList.add('hidden');
+        }
+    }
 
     function initMap(lat, long) {
         if (!map) {
@@ -94,17 +112,19 @@
         });
     }
 
-    function startTracking() {
+   function startTracking() {
         const trackingNumber = trackingSelect.value;
+
         if (!trackingNumber || trackingNumber === "") {
-            alert('Silakan pilih pengiriman yang akan diantar.');
+            showAlert('trackingAlert'); // <-- Kode baru
             return;
         }
 
         if (!navigator.geolocation) {
-            alert('Geolocation tidak didukung di browser ini.');
+            showAlert('trackingAlert');
             return;
         }
+
 
         startBtn.disabled = true;
         startBtn.textContent = 'Memulai...';

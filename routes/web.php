@@ -53,6 +53,7 @@ Route::middleware(['auth', 'verified', 'role:customer'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/daftar-pengiriman/{shipment}/cancel', [ShipmentController::class, 'cancel'])->name('user.shipment.cancel');
     Route::get('/kurir/scan/{tracking_number}', [ShipmentController::class, 'scanTrack'])->name('kurir.scan.track');
 });
 

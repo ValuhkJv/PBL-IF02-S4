@@ -167,7 +167,7 @@ public function storeFinal(Request $request)
             'orderID' => $order->orderID,
             'itemType' => $shipmentData['itemType'],
             'weightKG' => (float)$shipmentData['weightKG'],
-            'currentStatus' => 'Scheduled for Pickup', // Status awal pengiriman
+            'currentStatus' => 'Menunggu Konfirmasi', // Status awal pengiriman
             'finalPrice' => $shipmentData['estimatedPrice'],
         ]);
         
@@ -220,7 +220,7 @@ public function storeFinal(Request $request)
             
             TrackingHistory::create([
                 'shipmentID' => $shipment->shipmentID,
-                'statusDescription' => 'Pesanan COD dibuat, menunggu penjemputan.'
+                'statusDescription' => 'Pesanan COD dibuat, menunggu konfirmasi.'
             ]);
 
             DB::commit();
@@ -271,7 +271,7 @@ public function storeFinal(Request $request)
             ]);
 
             // Buat Shipment, Payment, dan Tracking History untuk COD
-            $shipment = Shipment::create(['orderID' => $order->orderID, 'itemType' => $shipmentData['itemType'], 'weightKG' => (float)$shipmentData['weightKG'], 'currentStatus' => 'Scheduled for Pickup', 'finalPrice' => $shipmentData['estimatedPrice']]);
+            $shipment = Shipment::create(['orderID' => $order->orderID, 'itemType' => $shipmentData['itemType'], 'weightKG' => (float)$shipmentData['weightKG'], 'currentStatus' => 'Menunggu Konfirmasi', 'finalPrice' => $shipmentData['estimatedPrice']]);
             Payment::create(['orderID' => $order->orderID, 'amount' => $shipmentData['estimatedPrice'], 'paymentMethod' => 'COD', 'status' => 'Pending']);
             TrackingHistory::create(['shipmentID' => $shipment->shipmentID, 'statusDescription' => 'Pesanan COD dibuat (fallback dari online), menunggu penjemputan.']);
 
@@ -329,8 +329,8 @@ public function storeFinal(Request $request)
 
     // Status yang dianggap selesai
     private $finishedStatuses = [
-        'Pesanan Selesai', 'Pesanan diterima',
-        'Delivered', 'Cancelled', 'Returned to Sender', 'Dibatalkan', 'Dikembalikan'
+        'Pesanan Selesai', 'Pesanan Ditolak',
+        'Dibatalkan', 'Dikembalikan'
     ];
 
     /**
@@ -377,7 +377,7 @@ public function storeFinal(Request $request)
 
         // Query untuk shipment dengan status "Pesanan selesai" milik user saat ini
         $query = \App\Models\Shipment::with(['order.sender', 'courier', 'order.payments'])
-            ->where('currentStatus', 'Pesanan selesai')
+            ->where('currentStatus', 'Pesanan Selesai')
             ->whereHas('order', function ($query) {
                 $query->where('senderUserID', \Illuminate\Support\Facades\Auth::id());
             });
@@ -477,5 +477,37 @@ public function printResi($id)
 
         // GANTI INI KE NAMA VIEW BARU: kurir.resi_print
         return view('User.resi_print', compact('shipment', 'qrcode'));
+    }
+
+    public function cancel(Shipment $shipment)
+    {
+        // 1. Otorisasi: Pastikan pengguna yang login adalah pemilik pengiriman
+        if ($shipment->order->senderUserID !== Auth::id()) {
+            return redirect()->route('user.daftar_pengiriman')->with('error', 'Anda tidak memiliki izin untuk membatalkan pesanan ini.');
+        }
+
+        // 2. Validasi Aturan Bisnis: Cek status saat ini
+        $cancellableStatuses = ['Menunggu Pembayaran', 'Menunggu Penjemputan', 'Kurir Belum Ditugaskan'];
+        if (!in_array($shipment->currentStatus, $cancellableStatuses)) {
+            return redirect()->route('user.daftar_pengiriman')->with('error', 'Pesanan tidak dapat dibatalkan karena sudah dalam proses pengiriman.');
+        }
+
+        // 3. Proses Pembatalan
+        $shipment->currentStatus = 'Dibatalkan';
+        // (Opsional) Anda bisa menambahkan kolom 'cancelled_at' untuk mencatat waktu pembatalan
+        // $shipment->cancelled_at = now(); 
+        $shipment->save();
+
+        // 4. Logika Penanganan Pembayaran
+        // Cek jika pesanan sudah dibayar (misalnya, status pembayaran bukan 'pending' atau 'unpaid')
+        if ($shipment->order->payment_status === 'paid') {
+            // TODO: Logika untuk pengembalian dana (refund)
+            // Untuk saat ini, kita bisa menambahkan catatan untuk admin.
+            // Di masa depan, ini bisa diintegrasikan dengan API payment gateway.
+            Log::info('Pesanan ' . $shipment->tracking_number . ' dibatalkan dan memerlukan refund manual.');
+            // Anda juga bisa mengirim notifikasi ke admin di sini.
+        }
+        
+        return redirect()->route('user.daftar_pengiriman')->with('success', 'Pesanan dengan resi ' . $shipment->tracking_number . ' berhasil dibatalkan.');
     }
 }

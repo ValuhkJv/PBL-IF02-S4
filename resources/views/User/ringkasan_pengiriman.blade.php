@@ -1,10 +1,6 @@
 <x-app-layout>
+@section('title', 'Ringkasan Pesanan')
     <div class="relative">
-        <div class="bg-[rgba(255,165,0,0.75)] p-6 shadow-md h-40 absolute top-0 left-1/2 transform -translate-x-1/2 z-0" 
-             style="width: 100vw; margin-left: -50vw; left: 50%;"></div>
-        <div class="relative z-10 max-w-4xl mx-auto px-4 py-8">
-            <h1 class="text-2xl font-bold text-black mb-8 text-center">Ringkasan & Pembayaran</h1>
-
             <div class="bg-white rounded-lg shadow-md p-6 mb-6 space-y-4">
                 {{-- Ringkasan Pesanan --}}
                 <div>

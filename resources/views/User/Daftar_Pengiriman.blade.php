@@ -1,10 +1,7 @@
 <x-app-layout>
-     <div class="relative">
-         <div class="bg-[rgba(255,165,0,0.75)] p-6 shadow-md h-40 absolute top-0 left-1/2 transform -translate-x-1/2 z-0" 
-             style="width: 100vw; margin-left: -50vw; left: 50%;"></div>
-        <div class="relative z-10 max-w-7xl mx-auto px-4 py-8">
-            <h1 class="text-2xl font-bold text-black mb-8">Daftar Pengiriman</h1>
-            <div class="bg-white rounded-lg shadow-md p-6">
+@section('title', 'Daftar Pengiriman')
+        <div class="absolute top-32 left-0 right-0 px-4">
+            <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-lg text-center">
              {{-- Membuat form pencarian yang fungsional --}}
                 <form action="{{ route('user.daftar_pengiriman') }}" method="GET" class="flex justify-end mb-4 gap-2">
                     <input type="text" name="search" placeholder="Cari resi, penerima..." value="{{ request('search') }}" class="input input-bordered w-full max-w-xs">
@@ -38,7 +35,19 @@
                                 <td>{{ Str::limit($shipment->order->receiverAddress, 25) }}</td>
                                  <td>{{ $shipment->courier->name ?? 'Belum Ditentukan' }}</td>
                                 <td>{{ $shipment->courier->phone ?? 'Belum Tersedia' }}</td>
-                                <td><span class="badge badge-info">{{ $shipment->currentStatus }}</span></td>
+                                <td>
+                                    @php
+                                        $status = strtolower(trim($shipment->currentStatus));
+                                        $badgeClass = '';
+                                        if ($status === 'menunggu konfirmasi') $badgeClass = 'badge-ghost';
+                                        elseif ($status === 'kurir ditugaskan') $badgeClass = 'badge-info';
+                                        elseif ($status === 'kurir menuju lokasi penjemputan') $badgeClass = 'badge-warning';
+                                        elseif ($status === 'paket telah di-pickup') $badgeClass = 'badge-primary';
+                                        elseif ($status === 'dalam perjalanan ke penerima') $badgeClass = 'badge-secondary';
+                                        elseif ($status === 'pesanan selesai') $badgeClass = 'badge-success';
+                                    @endphp
+                                    <span class="badge {{ $badgeClass }}">{{ $shipment->currentStatus }}</span>
+                                </td>
                                 <td>
                                     <div class="w-20 p-1 bg-white border">
                                         {!! QrCode::size(70)->generate('https://sj-courier-service-production-3685.up.railway.app/') !!}
@@ -47,7 +56,22 @@
                                 <td>
                                     <a href="{{ route('user.confirmation', ['order' => $shipment->orderID]) }}"
                                     class="px-3 bg-blue-500 text-white py-1 rounded text-xs hover:bg-blue-600 shadow-md shadow-gray-700">Detail</a>
+                                     {{-- Logika untuk menampilkan tombol Batalkan --}}
+                                        @php
+                                            $cancellableStatuses = ['Menunggu Pembayaran', 'Menunggu Penjemputan', 'Kurir Belum Ditugaskan'];
+                                        @endphp
+                                        @if (in_array($shipment->currentStatus, $cancellableStatuses))
+                                            <form action="{{ route('user.shipment.cancel', $shipment->shipmentID) }}" method="POST" onsubmit="return confirm('Anda yakin ingin membatalkan pesanan dengan resi {{ $shipment->tracking_number }}?')">
+                                                @csrf
+                                                @method('PUT')
+                                                <button type="submit" class="px-3 bg-red-600 text-white py-1 rounded text-xs hover:bg-red-700 shadow">
+                                                    Batalkan
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
                                 </td>
+                                
                             </tr>
                             @empty
                             <tr>

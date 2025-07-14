@@ -162,13 +162,18 @@ Ini penting untuk keamanan Laravel, terutama saat mengirimkan shipment via AJAX.
                             <td class="px-4 py-2 text-center">{{ $shipment->courier->name ?? 'Belum Ditentukan' }}</td>
                             {{-- Menampilkan status pengiriman dengan warna berdasarkan status --}}
                             <td class="px-4 py-2 text-center font-semibold text-sm
-                                @if ($shipment->currentStatus === 'menunggu konfirmasi') text-gray-600
-                                @elseif ($shipment->currentStatus === 'sedang dikirim') text-red-600
-                                @elseif ($shipment->currentStatus === 'menuju alamat') text-blue-600
-                                @elseif ($shipment->currentStatus === 'pesanan diterima') text-green-600
+                                @php $status = strtolower(trim($shipment->currentStatus)); @endphp
+                                @if ($status === 'menunggu konfirmasi') text-gray-500
+                                @elseif ($status === 'kurir ditugaskan') text-blue-600
+                                @elseif ($status === 'kurir menuju lokasi penjemputan') text-yellow-600
+                                @elseif ($status === 'paket telah di-pickup') text-purple-600
+                                @elseif ($status === 'dalam perjalanan ke penerima') text-red-600
+                                @elseif ($status === 'pesanan selesai') text-green-600
+                                @else text-black
                                 @endif">
                                 {{ $shipment->currentStatus }}
                             </td>
+                            {{-- Tombol Aksi --}}
                             <td class="px-4 py-2 text-center">
                                 <div class="flex justify-center gap-2">
                                     {{-- Tombol Print --}}

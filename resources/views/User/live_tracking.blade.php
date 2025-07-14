@@ -1,25 +1,13 @@
-{{-- resources/views/User/live_tracking.blade.php --}}
-<x-app-layout>
-    {{-- Halaman ini didedikasikan untuk melacak satu nomor resi --}}
+@section('title', 'Live Tracking')
 
+<x-app-layout>
     @push('styles')
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     @endpush
 
-   <div class="relative">
-        {{-- Breadcrumbs/Background Kuning --}}
-        {{-- Ini adalah div yang akan memberikan background kuning penuh lebar --}}
-        {{-- Jika x-app-layout sudah memiliki background kuning ini, Anda bisa menghapusnya dari sini --}}
-        <div class="bg-[rgba(255,165,0,0.75)] p-6 shadow-md h-40 absolute top-0 left-1/2 transform -translate-x-1/2 z-0" 
-             style="width: 100vw; margin-left: -50vw; left: 50%;"></div>
-
-        {{-- Konten Utama Halaman --}}
-        <div class="relative z-10 max-w-7xl mx-auto px-4 py-8">
-            {{-- Judul Halaman --}}
-            <h1 class="text-2xl font-bold text-black mb-8">Live Tracking Pengiriman</h1>
-
             {{-- Kotak Pencarian dan Hasil Live Tracking --}}
-            <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="absolute top-32 left-0 right-0 px-4">
+            <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-lg text-center">
                 <h3 class="font-bold mb-2">Lacak Pengiriman Anda</h3>
                 <div class="flex gap-2 flex-col md:flex-row">
                     <input type="text" id="user_tracking_number" placeholder="Masukkan Nomor Resi Anda"
@@ -29,17 +17,14 @@
                     </button>
                     </div>
                     
-                    {{-- Kontainer untuk menampilkan semua hasil --}}
+                    {{-- Kontainer untuk menampilkan semua hasil --}} 
                     <div id="tracking_result" class="mt-4 hidden">
                         {{-- Hasil akan dirender oleh JavaScript di sini --}}
                     </div>
 
                     <p id="tracking_error_message" class="text-red-600 font-semibold mt-2 hidden"></p>
                 </div>
-            </div>
         </div>
-    </div>
-
     @push('scripts')
     <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -88,7 +73,7 @@
             return `
                 <div class="p-4 bg-gray-50 rounded-lg">
                     <div class="mb-4">
-                        <p><strong>Status Pengiriman:</strong> <span class="font-normal badge badge-info">${data.shipment_status || 'N/A'}</span></p>
+                        <p><strong>Status Pengiriman:</strong> <span class="font-normal badge ${getBadgeClass(data.shipment_status)}">${data.shipment_status || 'N/A'}</span></p>
                         <p><strong>Terakhir Diperbarui:</strong> <span class="font-normal">${data.last_tracked_at || 'N/A'}</span></p>
                     </div>
                     <div class="p-4 border rounded-md bg-white">
@@ -108,12 +93,26 @@
              return `
                 <div class="p-4 bg-gray-50 rounded-lg">
                     <div class="mb-2">
-                        <p><strong>Status:</strong> <span class="font-normal badge badge-success">${data.shipment_status || 'N/A'}</span></p>
+                        <p><strong>Status:</strong> <span class="font-normal badge ${getBadgeClass(data.shipment_status)}">${data.shipment_status || 'N/A'}</span></p>
                         <p><strong>Terakhir Diperbarui:</strong> <span class="font-normal">${data.last_tracked_at || 'N/A'}</span></p>
                     </div>
                     <div id="user_map" class="mt-2 rounded-md border" style="height: 400px;"></div>
                 </div>
             `;
+        }
+
+        function getBadgeClass(status) {
+        if (!status) return 'badge-info'; // Default
+        const s = status.toLowerCase().trim();
+        switch (s) {
+            case 'menunggu konfirmasi': return 'badge-ghost';
+            case 'kurir ditugaskan': return 'badge-info';
+            case 'kurir menuju lokasi penjemputan': return 'badge-warning';
+            case 'paket telah di-pickup': return 'badge-primary';
+            case 'dalam perjalanan ke penerima': return 'badge-secondary';
+            case 'pesanan selesai': return 'badge-success';
+            default: return 'badge-info';
+            }
         }
 
         function trackShipment() {

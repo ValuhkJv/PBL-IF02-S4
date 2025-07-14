@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light"> <!-- 👈 Tambah data-theme -->
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light"> 
 
 <head>
     <meta charset="utf-8">
@@ -28,16 +28,18 @@
             height: 300px;
             border-radius: 0.5rem; /* Sesuai dengan rounded-lg daisyUI */
         }
-
     </style>
 </head>
 
 <body class="font-sans antialiased min-h-screen bg-gray-100 flex flex-col"> <!-- Tambah bg abu-abu muda -->
     <!-- Navigation Header -->
     <x-header :user="Auth::user()" :links="getNavigationLinks(Auth::user())" />
-
+    
+    @if (!Route::is('dashboard'))
+    <x-page-header title="{{ View::getSection('title') ?? 'SJ Courier Service' }}" />
+    @endif
     <!-- Page Content -->
-    <main class="main-content flex-grow pt-20 md:px-10">
+    <main class="main-content mx-auto flex-grow px-4 py-6 pt-20">
         {{ $slot }}
     </main> 
 

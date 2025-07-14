@@ -12,7 +12,7 @@
         <div class="p-4 border-b">
             <div class="flex items-center space-x-3">
                 <div>
-                    <p class="text-xs text-gray-500 uppercase mt-4">Menu Admin</p>
+                    <p class="text-xs text-gray-500 uppercase mt-4">Profile Admin</p>
 
                     {{-- TAMBAHKAN MENU PROFIL DI SINI --}}
                     <a href="{{ route('admin.profile.edit') }}" class="sidebar-link flex items-center space-x-4 p-3 rounded-lg transition hover:bg-gradient-to-r hover:from-yellow-400 hover:to-orange-300 {{ request()->routeIs('admin.profile.index') ? 'bg-gradient-to-r from-yellow-400 to-orange-300 text-black font-semibold' : '' }}">

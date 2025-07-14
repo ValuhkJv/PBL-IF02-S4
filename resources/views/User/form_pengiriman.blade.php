@@ -1,13 +1,5 @@
 <x-app-layout>
-    {{-- Menggunakan komponen layout utama Anda yang sudah ada --}}
-    <div class="relative">
-        <!-- Background orange dari desain Anda -->
-       <div class="bg-[rgba(255,165,0,0.75)] p-6 shadow-md h-40 absolute top-0 left-1/2 transform -translate-x-1/2 z-0" 
-             style="width: 100vw; margin-left: -50vw; left: 50%;"></div>
-
-        <div class="relative z-10 max-w-4xl mx-auto px-4 py-8">
-            <h1 class="text-2xl font-bold text-black mb-8 text-center">Buat Pengiriman Baru: Isi Detail</h1>
-
+    @section('title', 'Form Pengiriman')
             {{-- Notifikasi Error/Sukses --}}
             @if(session('error'))
                 <div role="alert" class="alert alert-error mb-6 shadow-lg"><span>{{ session('error') }}</span></div>
@@ -21,6 +13,7 @@
                 </div>
             @endif
 
+            <div class="max-w-2xl mx-auto left-0 right-0 px-4 p-6">
             <form id="shipmentForm" method="POST" action="{{ route('user.store_pengiriman') }}">
                 @csrf
 
@@ -159,9 +152,7 @@
                     <button type="submit" class="btn bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-8 py-2 rounded-lg shadow-md w-full md:w-auto">Lanjutkan ke Ringkasan</button>
                 </div>
             </form>
-        </div>
-    </div>
-
+            </div>
     @push('scripts')
         <script>
             // Variabel global untuk menyimpan objek peta dan marker agar bisa diakses

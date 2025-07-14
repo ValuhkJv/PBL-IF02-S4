@@ -1,4 +1,5 @@
 <x-app-layout>
+    @section('title', 'Konfirmasi Pembayaran')
     <div class="max-w-md mx-auto px-4 py-8" id="confirmation-container">
         <h1 class="text-2xl font-bold text-center mb-4">Pengiriman Berhasil Dibuat!</h1>
         

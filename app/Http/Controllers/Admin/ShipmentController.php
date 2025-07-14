@@ -86,7 +86,7 @@ class ShipmentController extends Controller
 
         // Perbarui data pengiriman
         $shipment->courierUserID = $kurir->user_id;
-        $shipment->currentStatus = 'Menunggu Diambil Kurir';
+        $shipment->currentStatus = 'Kurir Ditugaskan';
         $shipment->pickupTimestamp = $request->pickupTimestamp;
         // Mengambil dari request 'notes' dan tetap menyimpan ke kolom 'noteadmin'
         $shipment->noteadmin = $request->notes; // <-- Telah diubah
@@ -138,23 +138,34 @@ class ShipmentController extends Controller
      * Menampilkan halaman riwayat pengiriman yang sudah selesai.
      */
 
+    /**
+     * Menampilkan halaman riwayat pengiriman yang sudah selesai.
+     * --- TELAH DIPERBAIKI ---
+     */
     public function historyPengiriman(Request $request)
     {
         $search = $request->input('search');
-        $query = Shipment::query();
+        $query = Shipment::query()->with(['order.sender', 'courier', 'order.payments']);
 
         if ($search) {
-            $query->where('tracking_number', 'like', '%' . $search . '%')
-                ->orWhereHas('order.sender', function($q) use ($search) {
-                    $q->where('name', 'like', '%' . $search . '%');
-                })
-                ->orWhereHas('order', function($q) use ($search) {
-                    $q->where('receiverName', 'like', '%' . $search . '%');
-                });
+            $query->where(function($q) use ($search) {
+                $q->where('tracking_number', 'like', '%' . $search . '%')
+                    ->orWhereHas('order.sender', function($subq) use ($search) {
+                        $subq->where('name', 'like', '%' . $search . '%');
+                    })
+                    ->orWhereHas('order', function($subq) use ($search) {
+                        $subq->where('receiverName', 'like', '%' . $search . '%');
+                    });
+            });
         }
 
-        $pengiriman = $query->whereRaw('TRIM(LOWER("currentStatus")) NOT IN (?)', ['Pesanan selesai'])
-                                ->latest()->paginate(10);
+        // PERBAIKAN 1: Sesuaikan kapitalisasi array agar sama persis dengan yang ada di database.
+        $finishedStatuses = ['Pesanan Selesai', 'Dibatalkan', 'Dikembalikan'];
+        
+        // PERBAIKAN 2: Gunakan whereIn langsung ke kolom 'currentStatus' tanpa DB::raw.
+        $query->whereIn('currentStatus', $finishedStatuses);
+
+        $pengiriman = $query->latest('updated_at')->paginate(10);
 
         return view('admin.history_pengiriman', compact('pengiriman'));
     }

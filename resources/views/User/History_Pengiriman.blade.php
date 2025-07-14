@@ -1,10 +1,7 @@
 <x-app-layout>
-    <div class="relative">
-        <div class="bg-[rgba(255,165,0,0.75)] p-6 shadow-md h-40 absolute top-0 left-1/2 transform -translate-x-1/2 z-0" 
-             style="width: 100vw; margin-left: -50vw; left: 50%;"></div>
-        <div class="relative z-10 max-w-7xl mx-auto px-4 py-8">
-            <h1 class="text-2xl font-bold text-black mb-8">History Pengiriman</h1>
-            <div class="bg-white rounded-lg shadow-md p-6">
+    @section('title', 'History Pengiriman')
+        <div class="absolute top-32 left-0 right-0 px-4">
+            <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-lg text-center">
                 {{-- Menampilkan pesan sukses jika ada (misal: setelah pembayaran berhasil) --}}
                 @if (session('success'))
                     <div role="alert" class="alert alert-success mb-6 shadow-lg">
@@ -42,7 +39,18 @@
                 <td class="px-4 py-3">{{ $shipment->courier->name ?? 'N/A' }}</td>
                 <td class="px-4 py-3 text-center">{{ $shipment->updated_at->format('d M Y') }}</td>
                 <td class="px-4 py-3 text-center">
-                    <span class="badge badge-success text-white whitespace-nowrap">
+                    @php
+                        $status = strtolower(trim($shipment->currentStatus));
+                        $badgeClass = '';
+                        if ($status === 'pesanan selesai') {
+                            $badgeClass = 'badge-success';
+                        } elseif ($status === 'dibatalkan') {
+                            $badgeClass = 'badge-error';
+                        } else {
+                            $badgeClass = 'badge-ghost';
+                        }
+                    @endphp
+                    <span class="badge {{ $badgeClass }} whitespace-nowrap">
                         {{ $shipment->currentStatus }}
                     </span>
                 </td>

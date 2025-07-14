@@ -168,10 +168,10 @@
     </tr>
     <tr>
         <td style="text-align: center; padding-top: 10px;">
-            <div class="city-box-content">BATAM KOTA</div>
+            <div class="city-box-content">{{ $shipment->order->receiverKecamatan }}</div>
         </td>
         <td style="text-align: center; padding-top: 10px;">
-            <div class="city-box-content">NONGSA</div>
+            <div class="city-box-content">{{ $shipment->order->pickupKecamatan }}</div>
         </td>
     </tr>
 </table>
