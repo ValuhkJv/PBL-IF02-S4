@@ -12,7 +12,7 @@
                 <div class="flex gap-2 flex-col md:flex-row">
                     <input type="text" id="user_tracking_number" placeholder="Masukkan Nomor Resi Anda"
                            class="input input-bordered w-full" />
-                    <button onclick="trackShipment()" class="btn bg-gradient-to-r from-yellow-400 to-yellow-300 text-black shadow font-semibold">
+                    <button id="track_btn" class="btn bg-gradient-to-r from-yellow-400 to-yellow-300 text-black shadow font-semibold">
                         Lacak
                     </button>
                     </div>
@@ -74,7 +74,7 @@
                 <div class="p-4 bg-gray-50 rounded-lg">
                     <div class="mb-4">
                         <p><strong>Status Pengiriman:</strong> <span class="font-normal badge ${getBadgeClass(data.shipment_status)}">${data.shipment_status || 'N/A'}</span></p>
-                        <p><strong>Terakhir Diperbarui:</strong> <span class="font-normal">${data.last_tracked_at || 'N/A'}</span></p>
+                        <p><strong>Terakhir Diperbarui:</strong> <span class="font-normal">${data.updated_at || 'N/A'}</span></p>
                     </div>
                     <div class="p-4 border rounded-md bg-white">
                         <h4 class="font-semibold mb-2 text-center">${message}</h4>
@@ -94,7 +94,7 @@
                 <div class="p-4 bg-gray-50 rounded-lg">
                     <div class="mb-2">
                         <p><strong>Status:</strong> <span class="font-normal badge ${getBadgeClass(data.shipment_status)}">${data.shipment_status || 'N/A'}</span></p>
-                        <p><strong>Terakhir Diperbarui:</strong> <span class="font-normal">${data.last_tracked_at || 'N/A'}</span></p>
+                        <p><strong>Terakhir Diperbarui:</strong> <span class="font-normal">${data.updated_at || 'N/A'}</span></p>
                     </div>
                     <div id="user_map" class="mt-2 rounded-md border" style="height: 400px;"></div>
                 </div>
