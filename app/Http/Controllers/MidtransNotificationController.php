@@ -31,15 +31,17 @@ class MidtransNotificationController extends Controller
 
         Log::info('Midtrans Notification: Payload received.', (array)$notificationPayload);
 
+        // Verifikasi keaslian notifikasi SEBELUM memproses apa pun.
+        // Dilakukan di luar try-catch utama agar payload palsu dijawab 403 dan
+        // tidak ikut tertelan oleh handler yang membalas 200.
         try {
-            // PENTING: Di lingkungan produksi, SELALU verifikasi signature dari Midtrans
-            // atau panggil API status Midtrans untuk mendapatkan status transaksi yang sebenarnya
-            // sebelum memproses notifikasi.
-            // $verifiedNotification = MidtransService::verifyNotification($notificationPayload);
-            // Untuk demo ini, kita asumsikan payload valid (setelah json_decode).
-            $verifiedNotification = $notificationPayload; // Menyederhanakan untuk demo
+            $verifiedNotification = MidtransService::verifyNotification($notificationPayload);
+        } catch (Exception $e) {
+            Log::warning('Midtrans Notification: Notifikasi ditolak. ' . $e->getMessage());
+            return response()->json(['message' => 'Invalid notification.'], 403);
+        }
 
-
+        try {
             $midtransOrderId = $verifiedNotification->order_id;
             $transactionStatus = $verifiedNotification->transaction_status;
             $fraudStatus = $verifiedNotification->fraud_status ?? null; // Bisa jadi tidak ada

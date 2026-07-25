@@ -38,14 +38,18 @@ class RegisteredUserController extends Controller
             'address' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $user = User::create([
+        $user = new User([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
             'address' => $request->address,
-            'role_id' => 3, // Set default role_id to 3 (user)
         ]);
+
+        // role_id di-set eksplisit (bukan lewat mass assignment) supaya tidak bisa
+        // ditimpa dari input request. 3 = customer.
+        $user->role_id = 3;
+        $user->save();
 
         event(new Registered($user));
 

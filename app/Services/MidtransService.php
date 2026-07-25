@@ -102,38 +102,56 @@ class MidtransService
     }
 
     /**
-     * Verifikasi notifikasi dari Midtrans.
+     * Verifikasi keaslian notifikasi dari Midtrans.
+     *
+     * Midtrans mengirimkan 'signature_key' berupa:
+     *   SHA512(order_id + status_code + gross_amount + ServerKey)
+     *
+     * Tanpa verifikasi ini, siapa pun yang mengetahui URL webhook bisa mengirim
+     * payload palsu dan menandai pesanan sebagai LUNAS tanpa benar-benar membayar.
      *
      * @param object $notificationPayload
-     * @return \Midtrans\Transaction
+     * @return object Payload yang sudah terverifikasi
      * @throws Exception
      */
     public static function verifyNotification($notificationPayload)
     {
-        // Untuk production, Anda mungkin ingin implementasi validasi signature key
-        // $isValidSignature = Veritrans_Vtweb::isValidSignature($notificationPayload, config('midtrans.server_key'));
-        // if(!$isValidSignature){
-        //     throw new Exception('Invalid Midtrans signature');
-        // }
+        // 1. Pastikan field wajib tersedia
+        $requiredFields = ['order_id', 'status_code', 'gross_amount', 'signature_key', 'transaction_status'];
 
-        // Atau, lebih mudah menggunakan status dari API
-        // Ini akan melakukan GET request ke API Midtrans untuk mendapatkan status transaksi yang sebenarnya
-        // Hal ini lebih aman daripada hanya mempercayai payload notifikasi.
-        // try {
-        //     $status = \Midtrans\Transaction::status($notificationPayload->order_id);
-        //     return $status;
-        // } catch (Exception $e) {
-        //     Log::error("MidtransService: Gagal verifikasi status notifikasi Midtrans Order ID: {$notificationPayload->order_id}. Error: " . $e->getMessage());
-        //     throw new Exception("Gagal verifikasi status transaksi Midtrans.");
-        // }
-
-        // Untuk contoh ini, kita akan langsung memproses payload (ASUMSI PAYLOAD VALID)
-        // PENTING: Di produksi, SELALU verifikasi signature atau panggil API status Midtrans.
-        if (empty($notificationPayload->order_id) || empty($notificationPayload->transaction_status)) {
-            Log::error("MidtransService: Payload notifikasi tidak valid.", (array) $notificationPayload);
-            throw new Exception("Payload notifikasi Midtrans tidak lengkap.");
+        foreach ($requiredFields as $field) {
+            if (empty($notificationPayload->{$field})) {
+                Log::error("MidtransService: Payload notifikasi tidak lengkap, field '{$field}' kosong.", (array) $notificationPayload);
+                throw new Exception("Payload notifikasi Midtrans tidak lengkap.");
+            }
         }
-        Log::info("MidtransService: Payload notifikasi diterima untuk Midtrans Order ID: {$notificationPayload->order_id}", (array) $notificationPayload);
-        return $notificationPayload; // Langsung kembalikan payload (untuk disederhanakan)
+
+        // 2. Hitung signature yang seharusnya, lalu bandingkan
+        $serverKey = config('midtrans.server_key');
+
+        if (empty($serverKey)) {
+            Log::critical('MidtransService: MIDTRANS_SERVER_KEY belum dikonfigurasi, notifikasi tidak dapat diverifikasi.');
+            throw new Exception('Konfigurasi Midtrans tidak lengkap.');
+        }
+
+        $expectedSignature = hash('sha512',
+            $notificationPayload->order_id
+            . $notificationPayload->status_code
+            . $notificationPayload->gross_amount
+            . $serverKey
+        );
+
+        // hash_equals: perbandingan constant-time untuk mencegah timing attack
+        if (! hash_equals($expectedSignature, $notificationPayload->signature_key)) {
+            Log::warning('MidtransService: Signature notifikasi TIDAK VALID, notifikasi ditolak.', [
+                'order_id' => $notificationPayload->order_id,
+                'status_code' => $notificationPayload->status_code,
+            ]);
+            throw new Exception('Signature notifikasi Midtrans tidak valid.');
+        }
+
+        Log::info("MidtransService: Signature notifikasi valid untuk Midtrans Order ID: {$notificationPayload->order_id}.");
+
+        return $notificationPayload;
     }
 }

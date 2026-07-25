@@ -179,13 +179,13 @@ class KelolaStatusController extends Controller
         return view('kurir.history_pengiriman_kurir', compact('shipments'));
     }
 
-    // Fungsi download dan print Resi tidak perlu diubah, hanya pastikan nama variabelnya benar
     public function downloadResi($id)
 {
     $shipment = Shipment::findOrFail($id);
 
-    // Buat isi QR Code berupa URL Google Drive
-    $qrContent = 'https://sj-courier-service-production-3685.up.railway.app/';
+    $this->authorizeAssignedCourier($shipment);
+
+    $qrContent = config('app.url');
 
     // Generate QR code dari link URL, bukan dari tracking_number
     $qrcode = base64_encode(QrCode::format('png')->size(150)->generate($qrContent));
@@ -203,8 +203,9 @@ public function printResi($id)
     {
         $shipment = Shipment::findOrFail($id);
 
-        // Buat isi QR Code (contoh: link tracking atau data resi)
-        $qrContent = 'https://sj-courier-service-production-3685.up.railway.app/';
+        $this->authorizeAssignedCourier($shipment);
+
+        $qrContent = config('app.url');
 
         // Generate QR code dalam format base64 PNG
         // Ukuran QR Code untuk browser print (biasanya lebih kecil karena resolusi layar)
@@ -212,5 +213,16 @@ public function printResi($id)
 
         // GANTI INI KE NAMA VIEW BARU: kurir.resi_print
         return view('kurir.resi_print', compact('shipment', 'qrcode'));
+    }
+
+    /**
+     * Pastikan pengiriman yang diakses memang ditugaskan ke kurir yang sedang login.
+     * Mencegah kurir lain menebak shipmentID untuk melihat resi yang bukan tugasnya.
+     */
+    private function authorizeAssignedCourier(Shipment $shipment): void
+    {
+        if ($shipment->courierUserID !== Auth::id()) {
+            abort(403, 'Anda tidak bertugas untuk pengiriman ini.');
+        }
     }
 }

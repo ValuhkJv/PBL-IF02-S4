@@ -124,9 +124,14 @@ Route::get('/force-logout', function () {
 });
 
 Route::post('/tarif/hitung', [TarifController::class, 'hitungTarif'])->name('tarif.hitung');
-Route::prefix('admin/pengiriman')->name('admin.')->group(function () {
+
+// Resi admin: wajib login sebagai admin
+Route::prefix('admin/pengiriman')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('download/{shipmentID}', [AdminShipmentController::class, 'downloadResi'])->name('downloadResi');
     Route::get('print/{shipmentID}', [AdminShipmentController::class, 'printResi'])->name('printResi');
 });
 
-  Route::get('/print-resi/{shipmentID}', [ShipmentController::class, 'printResi'])->name('User.printResi');
+// Resi customer: wajib login sebagai customer, kepemilikan dicek di controller
+Route::get('/print-resi/{shipmentID}', [ShipmentController::class, 'printResi'])
+    ->middleware(['auth', 'verified', 'role:customer'])
+    ->name('User.printResi');

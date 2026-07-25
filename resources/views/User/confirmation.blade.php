@@ -20,9 +20,8 @@
 
             {{-- QR Code dan Nomor Resi --}}
             <div class="text-center my-4">
-            {{-- QR Code berisi URL Google Drive --}}
                 @php
-                 $qrContent = 'https://sj-courier-service-production-3685.up.railway.app/';
+                 $qrContent = config('app.url');
                 @endphp
             <div class="inline-block p-2 border">
              {!! QrCode::size(120)->generate($qrContent) !!}

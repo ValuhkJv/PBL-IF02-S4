@@ -66,16 +66,18 @@ public function store(Request $request)
         // tambahkan validasi lain sesuai kebutuhan
     ]);
 
-    User::create([
+    $kurir = new User([
         'name' => $request->name,
         'phone' => $request->phone,
         'address' => $request->address,
         'area_id' => $request->area_id,
         'email' => $request->email,
         'password' => Hash::make($request->password),
-        'role_id' => 2, // ganti sesuai id role courier di tabel roles
-        // field lain sesuai kebutuhan
     ]);
+
+    // role_id di-set eksplisit (bukan lewat mass assignment). 2 = courier.
+    $kurir->role_id = 2;
+    $kurir->save();
 
     return redirect()->route('admin.kelola_kurir')->with('success', 'Kurir berhasil ditambahkan.');
 }

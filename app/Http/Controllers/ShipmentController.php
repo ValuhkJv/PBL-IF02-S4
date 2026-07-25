@@ -447,10 +447,11 @@ public function storeFinal(Request $request)
 
     public function downloadResi($id)
 {
-    $shipment = Shipment::findOrFail($id);
+    $shipment = Shipment::with('order')->findOrFail($id);
 
-    // Buat isi QR Code berupa URL Google Drive
-    $qrContent = 'https://sj-courier-service-production-3685.up.railway.app/';
+    $this->authorizeShipmentOwner($shipment);
+
+    $qrContent = config('app.url');
 
     // Generate QR code dari link URL, bukan dari tracking_number
     $qrcode = base64_encode(QrCode::format('png')->size(150)->generate($qrContent));
@@ -466,10 +467,11 @@ public function storeFinal(Request $request)
  */
 public function printResi($id)
     {
-        $shipment = Shipment::findOrFail($id);
+        $shipment = Shipment::with('order')->findOrFail($id);
 
-        // Buat isi QR Code (contoh: link tracking atau data resi)
-        $qrContent = 'https://sj-courier-service-production-3685.up.railway.app/';
+        $this->authorizeShipmentOwner($shipment);
+
+        $qrContent = config('app.url');
 
         // Generate QR code dalam format base64 PNG
         // Ukuran QR Code untuk browser print (biasanya lebih kecil karena resolusi layar)
@@ -477,6 +479,18 @@ public function printResi($id)
 
         // GANTI INI KE NAMA VIEW BARU: kurir.resi_print
         return view('User.resi_print', compact('shipment', 'qrcode'));
+    }
+
+    /**
+     * Pastikan pengiriman yang diakses benar-benar milik customer yang sedang login.
+     * Mencegah IDOR: customer menebak shipmentID milik orang lain untuk melihat resi
+     * (yang memuat nama, alamat, dan telepon pengirim & penerima).
+     */
+    private function authorizeShipmentOwner(Shipment $shipment): void
+    {
+        if (! $shipment->order || $shipment->order->senderUserID !== Auth::id()) {
+            abort(403, 'Anda tidak memiliki akses ke resi pengiriman ini.');
+        }
     }
 
     public function cancel(Shipment $shipment)

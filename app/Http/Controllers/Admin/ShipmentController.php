@@ -178,7 +178,7 @@ class ShipmentController extends Controller
     $shipment = Shipment::findOrFail($id);
  
     // QRCODE
-    $qrContent = 'https://sj-courier-service-production-3685.up.railway.app/';
+    $qrContent = config('app.url');
 
     // Generate QR code dari link URL
     $qrcode = base64_encode(QrCode::format('png')->size(150)->generate($qrContent));
@@ -197,7 +197,7 @@ class ShipmentController extends Controller
         $shipment = Shipment::findOrFail($id);
 
         // QRCODE
-        $qrContent = 'https://sj-courier-service-production-3685.up.railway.app/';
+        $qrContent = config('app.url');
 
         // Generate QR code dalam format base64 PNG
         // Ukuran QR Code untuk browser print (biasanya lebih kecil karena resolusi layar)

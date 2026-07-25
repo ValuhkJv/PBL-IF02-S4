@@ -50,7 +50,7 @@
                                 </td>
                                 <td>
                                     <div class="w-20 p-1 bg-white border">
-                                        {!! QrCode::size(70)->generate('https://sj-courier-service-production-3685.up.railway.app/') !!}
+                                        {!! QrCode::size(70)->generate(config('app.url')) !!}
                                     </div>
                                 </td>
                                 <td>

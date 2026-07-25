@@ -60,7 +60,10 @@ class ProfileController extends Controller
                     // Email memerlukan password saat ini untuk keamanan.
                     // Ini adalah praktik yang baik untuk perubahan sensitif seperti email.
                     $request->validate([
-                        'value' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+                        // Primary key model User adalah 'user_id', bukan 'id'.
+                        // Tanpa menyebut kolomnya, $user->id bernilai null sehingga
+                        // pengecualian unique tidak pernah cocok.
+                        'value' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->user_id . ',user_id'],
                         'current_password' => ['required', 'string', 'current_password'],
                     ], [
                         'current_password.required' => 'Kata sandi saat ini wajib diisi untuk mengubah email.',

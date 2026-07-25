@@ -22,8 +22,13 @@ class User extends Authenticatable implements MustVerifyEmail
      // Tentukan primary key
      protected $primaryKey = 'user_id';
 
+    /**
+     * Catatan: 'role_id' sengaja TIDAK dimasukkan ke $fillable agar tidak bisa
+     * di-set lewat mass assignment. Kalau ada input user yang lolos ke
+     * create()/update() secara massal, penyerang bisa mengangkat dirinya
+     * menjadi admin. Set role_id selalu secara eksplisit di controller.
+     */
     protected $fillable = [
-        'role_id',
         'name',
         'phone',
         'email',

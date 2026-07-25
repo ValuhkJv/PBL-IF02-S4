@@ -49,6 +49,44 @@ class LiveTrackingController extends Controller
     }
 
     /**
+     * Tentukan apakah pemohon berhak melihat detail lengkap sebuah pengiriman
+     * (termasuk alamat penerima): admin, kurir yang bertugas, atau pemilik order.
+     */
+    private function canSeeFullDetails(Shipment $shipment): bool
+    {
+        if (! Auth::check()) {
+            return false;
+        }
+
+        $user = Auth::user();
+        $roleName = $user->role->role_name ?? null;
+
+        return match ($roleName) {
+            'admin' => true,
+            'courier' => $shipment->courierUserID === $user->user_id,
+            'customer' => $shipment->order && $shipment->order->senderUserID === $user->user_id,
+            default => false,
+        };
+    }
+
+    /**
+     * Samarkan nama agar pemohon anonim tetap bisa memverifikasi kiriman
+     * tanpa membocorkan identitas penuh penerima. Contoh: "Aulia Sabrina" -> "Au*** Sa***"
+     */
+    private function maskName(?string $name): string
+    {
+        if (blank($name)) {
+            return '-';
+        }
+
+        $masked = array_map(function (string $part) {
+            return mb_strlen($part) <= 2 ? $part . '***' : mb_substr($part, 0, 2) . '***';
+        }, preg_split('/\s+/', trim($name)));
+
+        return implode(' ', $masked);
+    }
+
+    /**
      * Memperbarui lokasi terkini kurir (dan pengiriman) berdasarkan nomor resi.
      * Endpoint ini akan dipanggil secara berkala dari sisi kurir.
      *
@@ -118,7 +156,6 @@ class LiveTrackingController extends Controller
             Log::error('Error in updateLocation: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'message' => 'Gagal memperbarui lokasi: Terjadi kesalahan server.',
-                'error_detail' => $e->getMessage()
             ], 500);
         }
     }
@@ -144,8 +181,7 @@ class LiveTrackingController extends Controller
             // Ambil data pengiriman dengan relasi ke order
             $shipment = Shipment::with('order')->where('tracking_number', $request->tracking_number)->first();
 
-            // Otorisasi sederhana (opsional, bisa disesuaikan)
-            // Jika user adalah customer, pastikan dia adalah pemilik order
+            // Otorisasi: customer hanya boleh melacak pengirimannya sendiri.
             if (Auth::check() && Auth::user()->role->role_name === 'customer') {
                 if ($shipment->order->senderUserID !== Auth::id()) {
                      return response()->json(['message' => 'Unauthorized. Anda tidak memiliki akses ke pengiriman ini.'], 403);
@@ -156,13 +192,23 @@ class LiveTrackingController extends Controller
                 ? Carbon::parse($shipment->updated_at)->setTimezone('Asia/Jakarta')->format('d M Y, H:i:s') . ' WIB'
                 : 'N/A';
 
-            // Siapkan data detail untuk ditampilkan di frontend
+            // Tentukan apakah pemohon berhak melihat data lengkap.
+            // Endpoint ini terbuka untuk guest (cukup tahu nomor resi), sehingga alamat
+            // penerima TIDAK boleh dibuka ke pemohon anonim: nomor resi bisa ditebak,
+            // dan alamat lengkap adalah data pribadi.
+            $isPrivileged = $this->canSeeFullDetails($shipment);
+
             $shipmentDetails = [
-                'receiver_name' => $shipment->order->receiverName,
-                'receiver_address' => $shipment->order->receiverAddress,
+                'receiver_name' => $isPrivileged
+                    ? $shipment->order->receiverName
+                    : $this->maskName($shipment->order->receiverName),
                 'item_type' => $shipment->itemType,
                 'weight_kg' => $shipment->weightKG,
             ];
+
+            if ($isPrivileged) {
+                $shipmentDetails['receiver_address'] = $shipment->order->receiverAddress;
+            }
 
             // Cek apakah pengiriman sudah selesai
             if (in_array(strtolower(trim($shipment->currentStatus)), $this->finishedStatuses)) {
@@ -215,8 +261,10 @@ class LiveTrackingController extends Controller
     public function getAllActiveShipments()
     {
         try {
-            // Hanya admin yang bisa mengakses
-            if (!Auth::check() || Auth::user()->role !== 'admin') {
+            // Hanya admin yang bisa mengakses.
+            // Catatan: 'role' adalah relasi Eloquent, jadi harus dibandingkan
+            // lewat ->role_name, bukan langsung dengan string.
+            if (!Auth::check() || Auth::user()->role->role_name !== 'admin') {
                 return response()->json(['message' => 'Unauthorized. Hanya admin yang dapat mengakses data ini.'], 403);
             }
 
@@ -245,7 +293,6 @@ class LiveTrackingController extends Controller
             Log::error('Error in getAllActiveShipments: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'message' => 'Gagal mengambil data pengiriman aktif.',
-                'error_detail' => $e->getMessage()
             ], 500);
         }
     }
@@ -259,13 +306,17 @@ class LiveTrackingController extends Controller
     {
         try {
             // Hanya customer yang bisa mengakses
-            if (!Auth::check() || Auth::user()->role !== 'customer') {
+            if (!Auth::check() || Auth::user()->role->role_name !== 'customer') {
                 return response()->json(['message' => 'Unauthorized. Hanya customer yang dapat mengakses data ini.'], 403);
             }
 
-            // Ambil pengiriman milik customer yang login
+            // Ambil pengiriman milik customer yang login.
+            // Kepemilikan customer tersimpan di orders.senderUserID, bukan di kolom
+            // shipments.customer_id (kolom tersebut tidak ada di skema).
             $shipments = Shipment::select('tracking_number', 'current_lat', 'current_long', 'currentStatus', 'updated_at')
-                                ->where('customer_id', Auth::id())
+                                ->whereHas('order', function ($q) {
+                                    $q->where('senderUserID', Auth::id());
+                                })
                                 ->whereNotNull('current_lat')
                                 ->whereNotNull('current_long')
                                 ->get();
@@ -289,7 +340,6 @@ class LiveTrackingController extends Controller
             Log::error('Error in getCustomerShipments: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'message' => 'Gagal mengambil data pengiriman customer.',
-                'error_detail' => $e->getMessage()
             ], 500);
         }
     }
@@ -303,13 +353,14 @@ class LiveTrackingController extends Controller
     {
         try {
             // Hanya kurir yang bisa mengakses
-            if (!Auth::check() || Auth::user()->role !== 'courier') {
+            if (!Auth::check() || Auth::user()->role->role_name !== 'courier') {
                 return response()->json(['message' => 'Unauthorized. Hanya kurir yang dapat mengakses data ini.'], 403);
             }
 
-            // Ambil pengiriman yang ditugaskan ke kurir yang login
+            // Ambil pengiriman yang ditugaskan ke kurir yang login.
+            // Kolom yang benar adalah courierUserID (bukan courier_id).
             $shipments = Shipment::select('tracking_number', 'current_lat', 'current_long', 'currentStatus', 'updated_at')
-                                ->where('courier_id', Auth::id())
+                                ->where('courierUserID', Auth::id())
                                 ->whereNotNull('current_lat')
                                 ->whereNotNull('current_long')
                                 ->get();
@@ -333,7 +384,6 @@ class LiveTrackingController extends Controller
             Log::error('Error in getCourierShipments: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'message' => 'Gagal mengambil data pengiriman kurir.',
-                'error_detail' => $e->getMessage()
             ], 500);
         }
     }
